@@ -12,15 +12,15 @@
 	<h:form>
 		<h:panelGrid columns="2">
 			<h:outputLabel value="Username:" for="username" />
-			<h:inputText id="username" value="#{userController.credentials.username}"
+			<h:inputText id="username" value="#{credentials.username}"
 				size="40" />
 			<h:outputLabel value="Password: " for="password" />
-			<h:inputText id="password" value="#{userController.credentials.password}"
+			<h:inputSecret id="password" value="#{credentials.password}"
 				size="40" />
+			<h:commandButton value="Login" action="#{userController.login()}">
+				<f:ajax value="process" execute="password username"/>
+			</h:commandButton>
 		</h:panelGrid>
-		<h:commandLink value="Login" action="#{userController.login()}">
-			<f:ajax render="login form"></f:ajax>
-		</h:commandLink>
 	</h:form>
 </h:body>
 </html>

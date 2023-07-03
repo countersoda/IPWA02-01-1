@@ -1,24 +1,12 @@
-import java.io.Serializable;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.SessionScoped;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Named;
 
-@Named
-@ApplicationScoped
-public class Credentials implements Serializable{
+@Named 
+@RequestScoped
+public class Credentials {
 	
-	private static Credentials instance = new Credentials();
-
 	private String username;
 	private String password;
-
-	public Credentials() {
-	}
-	
-	public static Credentials getInstance() {
-		return instance;
-	}
 
 	public String getUsername() {
 		return username;
