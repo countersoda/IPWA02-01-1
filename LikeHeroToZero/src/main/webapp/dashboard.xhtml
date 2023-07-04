@@ -10,5 +10,11 @@
 </h:head>
 <h:body>
 	<h1>Dashboard</h1>
+	<h:form>
+		<h:commandButton value="Logout" action="#{credentialsController.logout()}"
+			rendered="#{credentialsController.isLoggedIn()}">
+			<f:ajax value="process" execute="password username" />
+		</h:commandButton>
+	</h:form>
 </h:body>
 </html>

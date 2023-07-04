@@ -9,6 +9,15 @@
 	<link rel="stylesheet" type="text/css" media="screen" href="style.css" />
 </h:head>
 <h:body>
-	<h:link value="Login" outcome="login.xhtml" />
+	<h1>LikeHeroToZero</h1>
+	<h:link value="Login" outcome="login.xhtml"
+		rendered="#{!credentialsController.isLoggedIn()}" />
+	<h:form>
+		<h:commandButton value="Logout"
+			action="#{credentialsController.logout()}"
+			rendered="#{credentialsController.isLoggedIn()}">
+			<f:ajax value="process" execute="password username" />
+		</h:commandButton>
+	</h:form>
 </h:body>
 </html>

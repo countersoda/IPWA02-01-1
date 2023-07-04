@@ -17,7 +17,7 @@
 			<h:outputLabel value="Password: " for="password" />
 			<h:inputSecret id="password" value="#{credentials.password}"
 				size="40" />
-			<h:commandButton value="Login" action="#{userController.login()}">
+			<h:commandButton value="Login" action="#{credentialsController.login()}">
 				<f:ajax value="process" execute="password username"/>
 			</h:commandButton>
 		</h:panelGrid>
