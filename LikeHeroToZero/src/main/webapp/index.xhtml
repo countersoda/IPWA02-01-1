@@ -18,6 +18,12 @@
 			rendered="#{credentialsController.isLoggedIn()}">
 			<f:ajax value="process" execute="password username" />
 		</h:commandButton>
+		<p:selectOneMenu value="#{emissionController.countries[0]}"
+			style="margin-top:2rem">
+			<f:selectItems value="#{emissionController.countries}" var="country"
+				itemLabel="#{country.name}" itemValue="#{country.code}" />
+			<p:ajax event="change" />
+		</p:selectOneMenu>
 	</h:form>
 </h:body>
 </html>

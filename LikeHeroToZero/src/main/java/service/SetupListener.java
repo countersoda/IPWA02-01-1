@@ -3,6 +3,7 @@ package service;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -31,15 +32,23 @@ public class SetupListener implements ServletContextListener {
 			statement.execute(
 					"create table if not exists user(user_id integer primary key, username string, password string)");
 			statement.executeUpdate("insert into user(username,password) values('test','test')");
+
+			statement.execute("drop table if exists emission");
+			statement.execute(
+					"create table if not exists emission(country_name string, country_code string, year integer, amount float)");
 			try {
 				String data = readFile("co2_emission.csv");
 				for (String line : data.split("\n")) {
 					String[] values = line.split(";");
-					String name = values[0];
-					String code = values[1];
-					String year = values[4];
-					String amount = values[5];
-					System.out.println(name + "," + code + "," + year + "," + amount);
+					String name = values[0].trim();
+					String code = values[1].trim();
+					String year = values[4].trim();
+					String amount = values[5].trim();
+					if (name.equals("country_name") || amount.isBlank())
+						continue;
+					statement.executeUpdate(String.format(
+							"insert into emission(country_name,country_code,year,amount) values(\"%s\",\"%s\",%s,%s)",
+							name, code, year, amount));
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
