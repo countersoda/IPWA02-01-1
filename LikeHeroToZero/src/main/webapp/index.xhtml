@@ -10,20 +10,40 @@
 </h:head>
 <h:body>
 	<h1>LikeHeroToZero</h1>
-	<h:link value="Login" outcome="login.xhtml"
+	<p:link value="Login" outcome="login.xhtml"
 		rendered="#{!credentialsController.isLoggedIn()}" />
-	<h:form>
-		<h:commandButton value="Logout"
+	<h:form style="position:fixed; top:20px; right:20px;">
+		<p:commandButton value="Dashboard" action="/dashboard.xhtml"
+			style="margin-right:1rem;"
+			rendered="#{credentialsController.isLoggedIn()}">
+		</p:commandButton>
+		<p:commandButton value="Logout"
 			action="#{credentialsController.logout()}"
 			rendered="#{credentialsController.isLoggedIn()}">
 			<f:ajax value="process" execute="password username" />
-		</h:commandButton>
-		<p:selectOneMenu value="#{emissionController.countries[0]}"
-			style="margin-top:2rem">
-			<f:selectItems value="#{emissionController.countries}" var="country"
-				itemLabel="#{country.name}" itemValue="#{country.code}" />
-			<p:ajax event="change" />
+		</p:commandButton>
+	</h:form>
+	<h:form>
+		<p:selectOneMenu id="selectCountry" converter="countryConverter"
+			value="#{country}" style="margin-top:2rem">
+			<f:selectItems value="#{countryController.countries}" var="val"
+				itemLabel="#{val.name}" itemValue="#{val}">
+			</f:selectItems>
+			<f:ajax event="itemSelect" execute="selectedCountry"
+				render="emissionTable" />
 		</p:selectOneMenu>
 	</h:form>
+	<h3>Emissions</h3>
+	<p:dataTable id="emissionTable" value="#{emissionController.emissions}"
+		var="val">
+		<p:column>
+			<f:facet name="header">Year</f:facet>
+			<h:outputText value="#{val.year}" />
+		</p:column>
+		<p:column>
+			<f:facet name="header">Amount</f:facet>
+			<h:outputText value="#{val.amount} kt" />
+		</p:column>
+	</p:dataTable>
 </h:body>
 </html>

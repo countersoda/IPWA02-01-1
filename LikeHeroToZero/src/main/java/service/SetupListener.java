@@ -12,6 +12,7 @@ import org.apache.commons.io.FileUtils;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
+import model.Emission;
 
 @WebListener
 public class SetupListener implements ServletContextListener {
@@ -25,9 +26,7 @@ public class SetupListener implements ServletContextListener {
 
 	public void contextInitialized(ServletContextEvent sce) {
 		Connection connection = SqliteService.getConnection();
-
-		try {
-			Statement statement = connection.createStatement();
+		try(Statement statement = connection.createStatement()) {
 			statement.execute("drop table if exists user");
 			statement.execute(
 					"create table if not exists user(user_id integer primary key, username string, password string)");

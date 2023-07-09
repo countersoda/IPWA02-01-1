@@ -10,11 +10,65 @@
 </h:head>
 <h:body>
 	<h1>Dashboard</h1>
-	<h:form>
-		<h:commandButton value="Logout" action="#{credentialsController.logout()}"
+	<h:form style="position:fixed; top:20px; right:20px;">
+		<p:commandButton value="Home" action="/index.xhtml"
+			style="margin-right:1rem;"
+			rendered="#{credentialsController.isLoggedIn()}">
+		</p:commandButton>
+		<p:commandButton value="Logout"
+			action="#{credentialsController.logout()}"
 			rendered="#{credentialsController.isLoggedIn()}">
 			<f:ajax value="process" execute="password username" />
-		</h:commandButton>
+		</p:commandButton>
 	</h:form>
+	<div
+		style="width: 100%; height: 100%; display: flex; align-items: center; flex-direction: column;">
+		<p:tabView>
+			<p:tab title="Edit">
+				<h:form style="display:grid;grid-template-columns:20vw;gap:2rem;">
+					<p:selectOneMenu id="selectCountry" converter="countryConverter"
+						value="#{country}">
+						<f:selectItems value="#{countryController.countries}" var="val"
+							itemLabel="#{val.name}" itemValue="#{val}">
+						</f:selectItems>
+						<f:ajax event="itemSelect" execute="selectedCountry"
+							render="selectYear" />
+					</p:selectOneMenu>
+					<p:selectOneMenu id="selectYear" value="#{emission.year}">
+						<f:selectItems value="#{emissionController.years}" var="year"
+							itemLabel="#{year}" itemValue="#{year}">
+						</f:selectItems>
+						<f:ajax event="itemSelect" execute="selectedYear"
+							listener="#{emissionController.setAmount()}"
+							render="selectAmount" />
+					</p:selectOneMenu>
+					<p:inputText id="selectAmount" value="#{emission.amount}"></p:inputText>
+					<p:commandButton value="Save"
+						action="#{emissionController.update()}"></p:commandButton>
+				</h:form>
+			</p:tab>
+			<p:tab title="Add">
+				<h:form style="display:grid;grid-template-columns:20vw;gap:2rem;">
+					<p:selectOneMenu id="selectCountry" converter="countryConverter"
+						value="#{country}">
+						<f:selectItems value="#{countryController.countries}" var="val"
+							itemLabel="#{val.name}" itemValue="#{val}" />
+						<f:ajax event="itemSelect" execute="selectedCountry"
+							render="selectYear" />
+					</p:selectOneMenu>
+					<p:panelGrid columns="2">
+						<p:outputLabel value="Year" for="inputYear" />
+						<p:inputText id="inputYear" value="#{emission.year}" />
+
+					</p:panelGrid>
+					<p:panelGrid columns="2">
+						<p:outputLabel value="amount" for="inputAmount" />
+						<p:inputText id="inputAmount" value="#{emission.amount}" />
+					</p:panelGrid>
+					<p:commandButton value="Save" action="#{emissionController.add()}" />
+				</h:form>
+			</p:tab>
+		</p:tabView>
+	</div>
 </h:body>
 </html>

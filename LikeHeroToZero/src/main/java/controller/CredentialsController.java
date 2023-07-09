@@ -49,11 +49,13 @@ public class CredentialsController implements Serializable {
 		ExternalContext context = facesContext.getExternalContext();
 
 		Statement statement = SqliteService.getConnection().createStatement();
-		ResultSet rs = statement.executeQuery("select * from user");
+		ResultSet rs = statement.executeQuery(
+				String.format("select username, password from user where username='%s'", credentials.getUsername()));
 		String username = rs.getString("username");
 		String password = rs.getString("password");
 
-		if (username.equals(credentials.getUsername()) && password.equals(credentials.getPassword())) {
+		if (username != null && password != null && username.equals(credentials.getUsername())
+				&& password.equals(credentials.getPassword())) {
 			HttpSession session = (HttpSession) context.getSession(false);
 			session.setMaxInactiveInterval(300);
 			session.setAttribute("username", username);
