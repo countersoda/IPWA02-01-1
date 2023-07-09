@@ -17,7 +17,7 @@ import service.SqliteService;
 @Named
 @ApplicationScoped
 public class CountryController implements Serializable {
-
+	
 	private List<Country> countries = new ArrayList<Country>();
 
 	public CountryController() {

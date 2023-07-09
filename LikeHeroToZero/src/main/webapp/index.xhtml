@@ -8,15 +8,16 @@
 	<title>LikeHeroToZero</title>
 	<link rel="stylesheet" type="text/css" media="screen" href="style.css" />
 </h:head>
-<h:body>
-	<h1>LikeHeroToZero</h1>
-	<p:link value="Login" outcome="login.xhtml"
-		rendered="#{!credentialsController.isLoggedIn()}" />
+<h:body
+	style="display:flex;flex-direction:column;align-items:center;gap:2rem;">
+	<h1 style="text-align: center;">LikeHeroToZero</h1>
 	<h:form style="position:fixed; top:20px; right:20px;">
-		<p:commandButton value="Dashboard" action="/dashboard.xhtml"
+		<p:link value="Login" outcome="login.xhtml"
+			rendered="#{!credentialsController.isLoggedIn()}" />
+		<p:link value="Dashboard" outcome="/dashboard.xhtml"
 			style="margin-right:1rem;"
 			rendered="#{credentialsController.isLoggedIn()}">
-		</p:commandButton>
+		</p:link>
 		<p:commandButton value="Logout"
 			action="#{credentialsController.logout()}"
 			rendered="#{credentialsController.isLoggedIn()}">
@@ -27,23 +28,14 @@
 		<p:selectOneMenu id="selectCountry" converter="countryConverter"
 			value="#{country}" style="margin-top:2rem">
 			<f:selectItems value="#{countryController.countries}" var="val"
-				itemLabel="#{val.name}" itemValue="#{val}">
-			</f:selectItems>
+				itemLabel="#{val.name}" itemValue="#{val}" />
 			<f:ajax event="itemSelect" execute="selectedCountry"
-				render="emissionTable" />
+				render="emissionChart" />
 		</p:selectOneMenu>
 	</h:form>
-	<h3>Emissions</h3>
-	<p:dataTable id="emissionTable" value="#{emissionController.emissions}"
-		var="val">
-		<p:column>
-			<f:facet name="header">Year</f:facet>
-			<h:outputText value="#{val.year}" />
-		</p:column>
-		<p:column>
-			<f:facet name="header">Amount</f:facet>
-			<h:outputText value="#{val.amount} kt" />
-		</p:column>
-	</p:dataTable>
+	<p:lineChart id="emissionChart"
+		model="#{emissionController.emissionModel}"
+		style="width: 100%; height: 500px;" />
+
 </h:body>
 </html>
