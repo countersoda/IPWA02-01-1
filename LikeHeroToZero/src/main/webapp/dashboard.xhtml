@@ -5,12 +5,12 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:f="http://java.sun.com/jsf/core">
 <h:head>
-	<title>LikeHeroToZero</title>
+	<title>Like Hero To Zero</title>
 	<link rel="stylesheet" type="text/css" media="screen" href="style.css" />
 </h:head>
 <h:body>
 	<h1 style="text-align: center;">Dashboard</h1>
-	<h:form style="position:fixed; top:20px; right:20px;">
+	<h:form style="position:absolute; top:20px; right:20px;">
 		<p:link value="Home" outcome="/index.xhtml" style="margin-right:1rem;"
 			rendered="#{credentialsController.isLoggedIn()}">
 		</p:link>
@@ -34,28 +34,31 @@
 		</h:form>
 		<p:tabView id="modify"
 			style="margin-top:2rem; margin-bottom:2rem; border:solid; border-width:1px;border-radius:10px;padding:20px;">
-			<p:tab id="edit" title="Edit">
+			<p:tab title="Edit">
 				<h:form>
 					<p:panelGrid columns="1">
-						<p:selectOneMenu id="selectYear" value="#{emission.year}">
-							<f:selectItems value="#{emissionController.years}" var="year"
-								itemLabel="#{year}" itemValue="#{year}">
+						<p:selectOneMenu id="selectEmission" value="#{emission.year}">
+							<f:selectItems value="#{emissionController.years}" var="val"
+								itemLabel="#{val}" itemValue="#{val}">
 							</f:selectItems>
-							<f:ajax event="itemSelect" execute="selectYear"
-								listener="#{emissionController.setAmount()}"
-								render="editSelectAmount editButtons" />
+							<f:ajax event="itemSelect" execute="selectEmission"
+								render="editSelectAmount" update="editSelectAmount"
+								listener="#{emissionController.setEmission()}" />
 						</p:selectOneMenu>
 						<p:inputText id="editSelectAmount" value="#{emission.amount}" />
+						<p:selectBooleanCheckbox value="#{emission.published}"
+							itemLabel="Published">
+						</p:selectBooleanCheckbox>
 						<p:panelGrid id="editButtons" columns="2">
 							<p:commandButton value="Remove"
-								style="background-color:red;border-color:red;"
-								action="#{emissionController.remove()}">
-								<f:ajax render="emissionTable @this"
-									update="emissionTable @this" />
+								style="background-color:tomato;border-color:tomato;"
+								action="#{emissionController.remove()}"
+								render="modify emissionTable" update="modify emissionTable">
 							</p:commandButton>
 							<p:commandButton value="Save"
-								action="#{emissionController.update()}" render="emissionTable"
-								update="emissionTable" />
+								action="#{emissionController.update()}"
+								render="modify emissionTable" update="modify emissionTable">
+							</p:commandButton>
 						</p:panelGrid>
 					</p:panelGrid>
 				</h:form>
@@ -71,6 +74,9 @@
 						<p:outputLabel value="Amount of CO₂" />
 						<p:inputText value="#{emission.amount}" />
 					</p:panelGrid>
+					<p:selectBooleanCheckbox value="#{emission.published}"
+						itemLabel="Published">
+					</p:selectBooleanCheckbox>
 					<p:commandButton value="Save" action="#{emissionController.add()}"
 						render="emissionTable" update="emissionTable" />
 				</h:form>
@@ -85,6 +91,13 @@
 			<p:column>
 				<f:facet name="header">Amount</f:facet>
 				<h:outputText value="#{val.amount} kt" />
+			</p:column>
+			<p:column>
+				<f:facet name="header">Published</f:facet>
+				<p:selectBooleanCheckbox value="#{val.published}"
+					itemLabel="Published">
+					<p:ajax listener="#{emissionController.update(val)}" />
+				</p:selectBooleanCheckbox>
 			</p:column>
 		</p:dataTable>
 	</div>

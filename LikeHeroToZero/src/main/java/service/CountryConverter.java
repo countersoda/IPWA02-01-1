@@ -10,7 +10,7 @@ import jakarta.faces.convert.Converter;
 import jakarta.faces.convert.FacesConverter;
 import model.Country;
 
-@FacesConverter(forClass = Country.class, value = "countryConverter")
+@FacesConverter(value = "countryConverter")
 public class CountryConverter implements Converter<Country> {
 
 	@Override

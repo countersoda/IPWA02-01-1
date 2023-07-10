@@ -26,7 +26,7 @@ public class SetupListener implements ServletContextListener {
 
 	public void contextInitialized(ServletContextEvent sce) {
 		Connection connection = SqliteService.getConnection();
-		try(Statement statement = connection.createStatement()) {
+		try (Statement statement = connection.createStatement()) {
 			statement.execute("drop table if exists user");
 			statement.execute(
 					"create table if not exists user(user_id integer primary key, username string, password string)");
@@ -34,7 +34,7 @@ public class SetupListener implements ServletContextListener {
 
 			statement.execute("drop table if exists emission");
 			statement.execute(
-					"create table if not exists emission(country_name string, country_code string, year integer, amount float)");
+					"create table if not exists emission(country_name string, country_code string, year integer, amount float,published boolean)");
 			try {
 				String data = readFile("co2_emission.csv");
 				for (String line : data.split("\n")) {
@@ -46,7 +46,7 @@ public class SetupListener implements ServletContextListener {
 					if (name.equals("country_name") || amount.isBlank())
 						continue;
 					statement.executeUpdate(String.format(
-							"insert into emission(country_name,country_code,year,amount) values(\"%s\",\"%s\",%s,%s)",
+							"insert into emission(country_name,country_code,year,amount,published) values(\"%s\",\"%s\",%s,%s,false)",
 							name, code, year, amount));
 				}
 			} catch (IOException e) {

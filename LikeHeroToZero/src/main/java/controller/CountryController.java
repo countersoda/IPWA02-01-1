@@ -1,6 +1,5 @@
 package controller;
 
-import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -9,15 +8,14 @@ import java.util.Collections;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import model.Country;
 import service.SqliteService;
 
 @Named
 @ApplicationScoped
-public class CountryController implements Serializable {
-	
+public class CountryController {
+
 	private List<Country> countries = new ArrayList<Country>();
 
 	public CountryController() {

@@ -5,7 +5,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.primefaces.model.charts.ChartData;
@@ -14,7 +13,6 @@ import org.primefaces.model.charts.line.LineChartModel;
 import org.primefaces.model.charts.line.LineChartOptions;
 import org.primefaces.model.charts.optionconfig.title.Title;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -44,7 +42,8 @@ public class EmissionController implements Serializable {
 
 		try (Statement statement = SqliteService.getConnection().createStatement()) {
 			ResultSet result = statement.executeQuery(String.format(
-					"select country_code, year, amount from emission where country_code=\"%s\"", country.getCode()));
+					"select country_code, year, amount from emission where country_code=\"%s\" and published=true",
+					country.getCode()));
 			while (result.next()) {
 				int year = result.getInt("year");
 				float amount = result.getFloat("amount");
@@ -79,58 +78,60 @@ public class EmissionController implements Serializable {
 		}
 
 		try (Statement statement = SqliteService.getConnection().createStatement()) {
-			ResultSet result = statement.executeQuery(String.format(
-					"select country_code, year, amount from emission where country_code=\"%s\" order by year",
-					country.getCode()));
+			ResultSet result = statement.executeQuery(
+					String.format("select year, amount,published from emission where country_code=\"%s\" order by year",
+							country.getCode()));
 			while (result.next()) {
 				int year = result.getInt("year");
 				float amount = result.getFloat("amount");
-				emissions.add(new Emission(year, amount));
+				boolean published = result.getBoolean("published");
+				emissions.add(new Emission(year, amount, published));
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return emissions;
 	}
 
 	public void update() {
-		System.out.println(emission.getYear() + ", " + emission.getAmount());
-		System.out.println(country.getCode() + ", " + country.getName());
 		try (Statement statement = SqliteService.getConnection().createStatement()) {
-			statement.execute(String.format("update emission set amount=%s where country_code=\"%s\" and year=%s",
-					emission.getAmount(), country.getCode(), emission.getYear()));
+			statement.execute(
+					String.format("update emission set amount=%s, published=%s where country_code=\"%s\" and year=%s",
+							emission.getAmount(), emission.isPublished(), country.getCode(), emission.getYear()));
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public void update(Emission emission) {
+		try (Statement statement = SqliteService.getConnection().createStatement()) {
+			statement.execute(
+					String.format("update emission set amount=%s, published=%s where country_code=\"%s\" and year=%s",
+							emission.getAmount(), !emission.isPublished(), country.getCode(), emission.getYear()));
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void add() {
-		System.out.println(emission.getYear() + ", " + emission.getAmount());
-		System.out.println(country.getCode() + ", " + country.getName());
 		List<Integer> years = getYears();
 		if (!years.contains(Integer.valueOf(emission.getYear()))) {
 			try (Statement statement = SqliteService.getConnection().createStatement()) {
 				statement.executeUpdate(String.format(
-						"insert into emission(country_name,country_code,year,amount) values(\"%s\",\"%s\",%s,%s)",
-						country.getName(), country.getCode(), emission.getYear(), emission.getAmount()));
-				System.out.println("Inserted!");
+						"insert into emission(country_name,country_code,year,amount,published) values(\"%s\",\"%s\",%s,%s,%s)",
+						country.getName(), country.getCode(), emission.getYear(), emission.getAmount(),
+						emission.isPublished()));
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 	}
 
 	public void remove() {
-		System.out.println(emission.getYear() + ", " + emission.getAmount());
-		System.out.println(country.getCode() + ", " + country.getName());
 		try (Statement statement = SqliteService.getConnection().createStatement()) {
 			statement.executeUpdate(String.format("delete from emission where country_code=\"%s\" and year=%s",
 					country.getCode(), emission.getYear()));
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -149,21 +150,21 @@ public class EmissionController implements Serializable {
 				years.add(year);
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return years;
 	}
 
-	public void setAmount() {
+	public void setEmission() {
 		try (Statement statement = SqliteService.getConnection().createStatement()) {
-			ResultSet result = statement
-					.executeQuery(String.format("select amount from emission where country_code=\"%s\" and year=%d",
+			ResultSet result = statement.executeQuery(
+					String.format("select amount,published from emission where country_code=\"%s\" and year=%d",
 							country.getCode(), emission.getYear()));
 			float amount = result.getFloat("amount");
+			boolean published = result.getBoolean("published");
 			emission.setAmount(amount);
+			emission.setPublished(published);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
