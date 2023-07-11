@@ -12,10 +12,13 @@ import org.apache.commons.io.FileUtils;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
+import model.Country;
 import model.Emission;
 
 @WebListener
 public class SetupListener implements ServletContextListener {
+
+	private static final JPAService jpaService = JPAService.getInstance();
 
 	public String readFile(String path) throws IOException {
 		ClassLoader classLoader = getClass().getClassLoader();
@@ -25,16 +28,7 @@ public class SetupListener implements ServletContextListener {
 	}
 
 	public void contextInitialized(ServletContextEvent sce) {
-		Connection connection = SqliteService.getConnection();
-		try (Statement statement = connection.createStatement()) {
-			statement.execute("drop table if exists user");
-			statement.execute(
-					"create table if not exists user(user_id integer primary key, username string, password string)");
-			statement.executeUpdate("insert into user(username,password) values('test','test')");
-
-			statement.execute("drop table if exists emission");
-			statement.execute(
-					"create table if not exists emission(country_name string, country_code string, year integer, amount float,published boolean)");
+		jpaService.runInTransaction(em -> {
 			try {
 				String data = readFile("co2_emission.csv");
 				for (String line : data.split("\n")) {
@@ -45,24 +39,19 @@ public class SetupListener implements ServletContextListener {
 					String amount = values[5].trim();
 					if (name.equals("country_name") || amount.isBlank())
 						continue;
-					statement.executeUpdate(String.format(
-							"insert into emission(country_name,country_code,year,amount,published) values(\"%s\",\"%s\",%s,%s,false)",
-							name, code, year, amount));
+					Country country = new Country(name, code);
+					em.persist(country);
+					em.persist(new Emission(Integer.parseInt(year), Float.parseFloat(amount), false, country));
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+			return null;
+		});
 
 	}
 
 	public void contextDestroyed(ServletContextEvent sce) {
-		try {
-			SqliteService.getConnection().close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		jpaService.shutdown();
 	}
 }

@@ -20,6 +20,7 @@
 			<f:ajax value="process" execute="password username" />
 		</p:commandButton>
 	</h:form>
+
 	<div
 		style="width: 100%; height: 100%; display: flex; align-items: center; flex-direction: column;">
 		<h:form>
@@ -29,77 +30,76 @@
 					itemLabel="#{val.name}" itemValue="#{val}">
 				</f:selectItems>
 				<f:ajax event="itemSelect" execute="selectCountry"
-					render="modify emissionTable" update="modify emissionTable" />
+					render="add emissionTableForm" update="add emissionTableForm"
+					listener="#{emissionController.setEmissions()}" />
 			</p:selectOneMenu>
 		</h:form>
-		<p:tabView id="modify"
-			style="margin-top:2rem; margin-bottom:2rem; border:solid; border-width:1px;border-radius:10px;padding:20px;">
-			<p:tab title="Edit">
-				<h:form>
-					<p:panelGrid columns="1">
-						<p:selectOneMenu id="selectEmission" value="#{emission.year}">
-							<f:selectItems value="#{emissionController.years}" var="val"
-								itemLabel="#{val}" itemValue="#{val}">
-							</f:selectItems>
-							<f:ajax event="itemSelect" execute="selectEmission"
-								render="editSelectAmount" update="editSelectAmount"
-								listener="#{emissionController.setEmission()}" />
-						</p:selectOneMenu>
-						<p:inputText id="editSelectAmount" value="#{emission.amount}" />
-						<p:selectBooleanCheckbox value="#{emission.published}"
-							itemLabel="Published">
-						</p:selectBooleanCheckbox>
-						<p:panelGrid id="editButtons" columns="2">
-							<p:commandButton value="Remove"
-								style="background-color:tomato;border-color:tomato;"
-								action="#{emissionController.remove()}"
-								render="modify emissionTable" update="modify emissionTable">
-							</p:commandButton>
-							<p:commandButton value="Save"
-								action="#{emissionController.update()}"
-								render="modify emissionTable" update="modify emissionTable">
-							</p:commandButton>
-						</p:panelGrid>
-					</p:panelGrid>
-				</h:form>
-			</p:tab>
-			<p:tab title="Add">
-				<h:form>
-					<p:panelGrid columns="2">
-						<p:outputLabel value="Year" />
-						<p:inputText value="#{emission.year}" />
-
-					</p:panelGrid>
-					<p:panelGrid columns="2">
-						<p:outputLabel value="Amount of CO₂" />
-						<p:inputText value="#{emission.amount}" />
-					</p:panelGrid>
-					<p:selectBooleanCheckbox value="#{emission.published}"
-						itemLabel="Published">
-					</p:selectBooleanCheckbox>
-					<p:commandButton value="Save" action="#{emissionController.add()}"
-						render="emissionTable" update="emissionTable" />
-				</h:form>
-			</p:tab>
-		</p:tabView>
-		<p:dataTable id="emissionTable"
-			value="#{emissionController.emissions}" stripedRows="true" var="val">
-			<p:column>
-				<f:facet name="header">Year</f:facet>
-				<h:outputText value="#{val.year}" />
-			</p:column>
-			<p:column>
-				<f:facet name="header">Amount</f:facet>
-				<h:outputText value="#{val.amount} kt" />
-			</p:column>
-			<p:column>
-				<f:facet name="header">Published</f:facet>
-				<p:selectBooleanCheckbox value="#{val.published}"
-					itemLabel="Published">
-					<p:ajax listener="#{emissionController.update(val)}" />
+		<h:form id="add" style="margin-top:2rem;">
+			<p:panelGrid columns="6">
+				<p:outputLabel value="Year" />
+				<p:inputText value="#{emission.year}" />
+				<p:outputLabel value="Amount of CO₂" />
+				<p:inputText value="#{emission.amount}" />
+				<p:selectBooleanCheckbox value="#{emission.published}"
+					itemLabel="Publish">
 				</p:selectBooleanCheckbox>
-			</p:column>
-		</p:dataTable>
+				<p:commandButton value="Save" action="#{emissionController.add()}"
+					render=":emissionTableForm:emissionTable"
+					update=":emissionTableForm:emissionTable" />
+			</p:panelGrid>
+		</h:form>
+		<p:panelGrid columns="2">
+			<p:commandButton value="Publish all"
+				action="#{emissionController.setPublished(true)}"
+				update="emissionTableForm" render="emissionTableForm"></p:commandButton>
+			<p:commandButton value="Unpublish all"
+				action="#{emissionController.setPublished(false)}"
+				update="emissionTableForm" render="emissionTableForm"></p:commandButton>
+		</p:panelGrid>
+		<h:form id="emissionTableForm">
+			<p:dataTable id="emissionTable"
+				value="#{emissionController.emissions}" stripedRows="true" var="val"
+				editable="true" selection="#{emissionController.selectedEmission}"
+				selectionMode="single" rowKey="#{val.year}">
+				<p:ajax event="rowEdit" listener="#{emissionController.update}"></p:ajax>
+				<p:column headerText="Year">
+					<h:outputText value="#{val.year}" />
+				</p:column>
+				<p:column headerText="Amount">
+					<p:cellEditor>
+						<f:facet name="output">
+							<h:outputText value="#{val.amount}"></h:outputText>
+							<h:outputLabel value=" kt"></h:outputLabel>
+						</f:facet>
+						<f:facet name="input">
+							<h:inputText value="#{val.amount}"></h:inputText>
+						</f:facet>
+					</p:cellEditor>
+				</p:column>
+				<p:column headerText="Published">
+					<p:cellEditor>
+						<f:facet name="output">
+							<p:selectBooleanCheckbox value="#{val.published}"
+								itemLabel="Published" disabled="true">
+							</p:selectBooleanCheckbox>
+						</f:facet>
+						<f:facet name="input">
+							<p:selectBooleanCheckbox value="#{val.published}"
+								itemLabel="Published">
+							</p:selectBooleanCheckbox>
+						</f:facet>
+					</p:cellEditor>
+				</p:column>
+				<p:column>
+					<p:rowEditor />
+				</p:column>
+			</p:dataTable>
+			<p:contextMenu for="emissionTable">
+				<p:menuitem value="Delete" update="@this emissionTable"
+					icon="pi pi-times" render="@this emissionTable"
+					action="#{emissionController.remove}" />
+			</p:contextMenu>
+		</h:form>
 	</div>
 </h:body>
 </html>

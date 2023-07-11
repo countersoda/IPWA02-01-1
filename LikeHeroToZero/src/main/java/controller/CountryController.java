@@ -1,37 +1,39 @@
 package controller;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.annotation.PostConstruct;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import model.Country;
-import service.SqliteService;
+import service.JPAService;
 
 @Named
-@ApplicationScoped
-public class CountryController {
+@ViewScoped
+public class CountryController implements Serializable {
 
+	private @Inject Country country;
+	private static final JPAService jpaService = JPAService.getInstance();
 	private List<Country> countries = new ArrayList<Country>();
 
 	public CountryController() {
-		try {
-			Statement statement = SqliteService.getConnection().createStatement();
-			ResultSet result = statement.executeQuery("select distinct country_name, country_code from emission");
-			while (result.next()) {
-				String name = result.getString("country_name");
-				String code = result.getString("country_code");
-				countries.add(new Country(name, code));
-			}
-			statement.close();
-			Collections.sort(countries);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		countries = jpaService.runInTransaction(em -> {
+			List<Country> countries = em
+					.createQuery("select distinct country_name, country_code from country", Country.class)
+					.getResultList();
+			return countries;
+		});
+		Collections.sort(countries);
+	}
+
+	@PostConstruct
+	public void init() {
+		country.setCode(countries.get(0).getCode());
+		country.setName(countries.get(0).getName());
 	}
 
 	public List<Country> getCountries() {

@@ -30,7 +30,8 @@
 			<f:selectItems value="#{countryController.countries}" var="val"
 				itemLabel="#{val.name}" itemValue="#{val}" />
 			<f:ajax event="itemSelect" execute="selectedCountry"
-				render="emissionChart" />
+				render="emissionChart"
+				listener="#{emissionController.setEmissionModel}" />
 		</p:selectOneMenu>
 	</h:form>
 	<p:lineChart id="emissionChart"

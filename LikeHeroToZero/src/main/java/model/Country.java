@@ -2,17 +2,30 @@ package model;
 
 import java.io.Serializable;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.ConversationScoped;
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Named
 @ViewScoped
+@Entity
+@Table(name = "country")
 public class Country implements Serializable, Comparable<Country> {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "country_id")
+	private Integer id;
+
+	@Column(name = "country_name")
 	private String name;
+
+	@Column(name = "country_code")
 	private String code;
 
 	public Country() {

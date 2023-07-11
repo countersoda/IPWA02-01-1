@@ -1,9 +1,5 @@
 package service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.convert.Converter;
@@ -13,20 +9,15 @@ import model.Country;
 @FacesConverter(value = "countryConverter")
 public class CountryConverter implements Converter<Country> {
 
+	private static final JPAService jpaService = JPAService.getInstance();
+
 	@Override
 	public Country getAsObject(FacesContext ctx, UIComponent component, String countryCode) {
-		Statement statement;
-		try {
-			statement = SqliteService.getConnection().createStatement();
-			ResultSet result = statement.executeQuery(String.format(
-					"select distinct country_name, country_code from emission where country_code='%s'", countryCode));
-			String name = result.getString("country_name");
-			String code = result.getString("country_code");
-			return new Country(name, code);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return null;
-		}
+		Country country = jpaService.runInTransaction(em -> em.createQuery(
+				String.format("select distinct country_name, country_code from emission where country_code='%s'",
+						countryCode),
+				Country.class).getSingleResult());
+		return country;
 	}
 
 	@Override

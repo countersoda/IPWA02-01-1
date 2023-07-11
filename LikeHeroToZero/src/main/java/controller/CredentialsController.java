@@ -2,13 +2,7 @@ package controller;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 
-import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
@@ -16,13 +10,14 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpSession;
 import model.Credentials;
-import service.SqliteService;
+import service.JPAService;
 
 @Named
 @SessionScoped
 public class CredentialsController implements Serializable {
 
 	private @Inject Credentials credentials;
+	private static final JPAService jpaService = JPAService.getInstance();
 
 	public CredentialsController() {
 	}
@@ -44,24 +39,23 @@ public class CredentialsController implements Serializable {
 		context.redirect("index.xhtml");
 	}
 
-	public void login() throws SQLException, IOException {
+	public void login() throws IOException {
 		FacesContext facesContext = FacesContext.getCurrentInstance();
 		ExternalContext context = facesContext.getExternalContext();
+		Credentials user = jpaService.runInTransaction(em -> em.createQuery(
+				String.format("select username, password from user where username='%s'", credentials.getUsername()),
+				Credentials.class).getSingleResult());
 
-		Statement statement = SqliteService.getConnection().createStatement();
-		ResultSet rs = statement.executeQuery(
-				String.format("select username, password from user where username='%s'", credentials.getUsername()));
-		String username = rs.getString("username");
-		String password = rs.getString("password");
-
-		if (username != null && password != null && username.equals(credentials.getUsername())
-				&& password.equals(credentials.getPassword())) {
+		if (user.getUsername() != null && user.getPassword() != null
+				&& user.getUsername().equals(credentials.getUsername())
+				&& user.getPassword().equals(credentials.getPassword())) {
 			HttpSession session = (HttpSession) context.getSession(false);
 			session.setMaxInactiveInterval(300);
-			session.setAttribute("username", username);
+			session.setAttribute("username", user.getUsername());
 			context.redirect("dashboard.xhtml");
 		} else {
 			context.redirect("login.xhtml");
 		}
+
 	}
 }
