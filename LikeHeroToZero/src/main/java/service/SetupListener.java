@@ -8,7 +8,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.apache.commons.io.FileUtils;
+import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException;
+import org.hibernate.exception.ConstraintViolationException;
 
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.RollbackException;
+import jakarta.persistence.TransactionRequiredException;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
@@ -39,7 +44,9 @@ public class SetupListener implements ServletContextListener {
 					String amount = values[5].trim();
 					if (name.equals("country_name") || amount.isBlank())
 						continue;
-					Country country = new Country(name, code);
+					Country country = new Country();
+					country.setName(name);
+					country.setCode(code);
 					em.persist(country);
 					em.persist(new Emission(Integer.parseInt(year), Float.parseFloat(amount), false, country));
 				}

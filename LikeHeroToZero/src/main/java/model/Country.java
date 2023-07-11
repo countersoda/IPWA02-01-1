@@ -13,19 +13,18 @@ import jakarta.persistence.Table;
 
 @Named
 @ViewScoped
-@Entity
-@Table(name = "country")
+@Entity(name = "country")
 public class Country implements Serializable, Comparable<Country> {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "country_id")
-	private Integer id;
+	private Integer country_id;
 
-	@Column(name = "country_name")
+	@Column(name = "name", nullable = false)
 	private String name;
 
-	@Column(name = "country_code")
+	@Column(name = "code", nullable = false)
 	private String code;
 
 	public Country() {

@@ -12,19 +12,18 @@ import jakarta.persistence.Table;
 
 @Named
 @RequestScoped
-@Entity(name = "User")
-@Table(name = "user")
+@Entity(name = "credentials")
 public class Credentials {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "user_id")
 	private Integer id;
-	
-	@Column(name = "username")
+
+	@Column(name = "username", nullable = false)
 	private String username;
-	
-	@Column(name = "password")
+
+	@Column(name = "password", nullable = false)
 	private String password;
 
 	public String getUsername() {

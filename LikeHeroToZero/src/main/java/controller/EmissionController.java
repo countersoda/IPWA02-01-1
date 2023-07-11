@@ -86,7 +86,7 @@ public class EmissionController implements Serializable {
 		if (country.getCode() != null) {
 			emissions.clear();
 			emissions.addAll(jpaService.runInTransaction(em -> em.createQuery(
-					String.format("select year, amount,published from emission where country_code=\"%s\" order by year",
+					String.format("select year, amount, published from emission where country_code=\"%s\" order by year",
 							country.getCode()),
 					Emission.class).getResultList()));
 		}

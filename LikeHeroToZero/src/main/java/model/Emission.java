@@ -4,37 +4,34 @@ import java.io.Serializable;
 
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.OneToOne;
 
 @Named
 @ViewScoped
-@Entity
-@Table(name = "emission")
+@Entity(name = "emission")
 public class Emission implements Serializable, Comparable<Emission> {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "emission_id")
 	private Integer id;
 
-	@Column(name = "year")
+	@Column(name = "emission_year", nullable = false)
 	private int year;
 
-	@Column(name = "amount")
+	@Column(name = "emission_amount", nullable = false)
 	private float amount;
 
-	@Column(name = "published")
+	@Column(name = "emission_published", nullable = false)
 	private boolean published;
 
-	@OneToMany(cascade = CascadeType.ALL)
+	@OneToOne
 	@JoinColumn(name = "country", referencedColumnName = "country_id")
 	private Country country;
 

@@ -22,8 +22,7 @@ public class CountryController implements Serializable {
 
 	public CountryController() {
 		countries = jpaService.runInTransaction(em -> {
-			List<Country> countries = em
-					.createQuery("select distinct country_name, country_code from country", Country.class)
+			List<Country> countries = em.createQuery("select distinct country from country", Country.class)
 					.getResultList();
 			return countries;
 		});
