@@ -1,31 +1,39 @@
 package model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Named
 @ViewScoped
-@Entity(name = "country")
+@Entity
 public class Country implements Serializable, Comparable<Country> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "country_id")
-	private Integer country_id;
+	private Integer id;
 
-	@Column(name = "name", nullable = false)
+	@Column(name = "country_name", nullable = false)
 	private String name;
 
-	@Column(name = "code", nullable = false)
+	@Column(name = "country_code", nullable = false)
 	private String code;
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "country")
+	private List<Emission> emissions = new ArrayList<>();
 
 	public Country() {
 	}
@@ -49,6 +57,19 @@ public class Country implements Serializable, Comparable<Country> {
 
 	public void setCode(String code) {
 		this.code = code;
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	@Override
+	public String toString() {
+		return this.name + "; " + this.code + "; " + this.id;
 	}
 
 	@Override

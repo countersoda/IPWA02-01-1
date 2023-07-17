@@ -4,17 +4,20 @@ import java.io.Serializable;
 
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 
 @Named
 @ViewScoped
-@Entity(name = "emission")
+@Entity
 public class Emission implements Serializable, Comparable<Emission> {
 
 	@Id
@@ -23,59 +26,72 @@ public class Emission implements Serializable, Comparable<Emission> {
 	private Integer id;
 
 	@Column(name = "emission_year", nullable = false)
-	private int year;
+	private int emission_year;
 
 	@Column(name = "emission_amount", nullable = false)
-	private float amount;
+	private float emission_amount;
 
 	@Column(name = "emission_published", nullable = false)
-	private boolean published;
+	private boolean emission_editable;
 
-	@OneToOne
-	@JoinColumn(name = "country", referencedColumnName = "country_id")
+	@ManyToOne(cascade = CascadeType.PERSIST)
+	@JoinColumn(name = "user_id")
+	private Credentials owner;
+
+	@ManyToOne(cascade = CascadeType.PERSIST)
+	@JoinColumn(name = "country_id")
 	private Country country;
 
 	public Emission() {
 	}
 
-	public Emission(int year, float amount, boolean published, Country country) {
-		this.year = year;
-		this.amount = amount;
-		this.published = published;
+	public Emission(int year, float amount, boolean editable, Country country, Credentials owner) {
+		this.emission_year = year;
+		this.emission_amount = amount;
+		this.emission_editable = editable;
 		this.country = country;
+		this.owner = owner;
+	}
+
+	public Integer getId() {
+		return this.id;
+	}
+
+	public String getOwner() {
+		return this.owner.getUsername();
 	}
 
 	@Override
 	public String toString() {
-		return String.format("%d; %f; %b", this.year, this.amount, this.published);
+		return String.format("%d; %f; %b", this.emission_year, this.emission_amount, this.emission_editable);
 	}
 
 	public float getAmount() {
-		return amount;
+		return emission_amount;
 	}
 
 	public void setAmount(float amount) {
-		this.amount = amount;
+		this.emission_amount = amount;
 	}
 
 	public int getYear() {
-		return year;
+		return emission_year;
 	}
 
 	public void setYear(int year) {
-		this.year = year;
+		this.emission_year = year;
 	}
 
-	public boolean isPublished() {
-		return published;
+	public boolean isEditable() {
+		return emission_editable;
 	}
 
-	public void setPublished(boolean published) {
-		this.published = published;
+	public void setEditable(boolean editable) {
+		this.emission_editable = editable;
 	}
 
 	@Override
 	public int compareTo(Emission o) {
-		return this.year - o.year;
+		return this.emission_year - o.emission_year;
 	}
 }

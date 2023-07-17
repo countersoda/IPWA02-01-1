@@ -18,7 +18,12 @@ import jakarta.annotation.PostConstruct;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.CriteriaUpdate;
+import jakarta.persistence.criteria.Root;
 import model.Country;
+import model.Credentials;
 import model.Emission;
 import service.JPAService;
 
@@ -28,6 +33,7 @@ public class EmissionController implements Serializable {
 
 	private @Inject Country country;
 	private @Inject Emission emission;
+	private @Inject Credentials owner;
 	private List<Emission> emissions = new ArrayList<Emission>();
 	private Emission selectedEmission;
 	private LineChartModel model = new LineChartModel();
@@ -45,16 +51,29 @@ public class EmissionController implements Serializable {
 	public LineChartModel setEmissionModel() {
 		ChartData data = new ChartData();
 		LineChartDataSet dataSet = new LineChartDataSet();
+		LineChartOptions options = new LineChartOptions();
+		Title title = new Title();
+		title.setDisplay(true);
+		title.setText("Emission");
+		options.setTitle(title);
+		model.setOptions(options);
+
 		List<String> years = new ArrayList<String>();
 		List<Object> amounts = new ArrayList<Object>();
 		model = new LineChartModel();
-		if (country.getCode() == null) {
+		if (country.getCode() == null || country.getId() == null) {
 			return model;
 		}
-		List<Emission> emissions = jpaService.runInTransaction(em -> em
-				.createQuery(String.format("select country_id, year, amount from emission where published=true"),
-						Emission.class)
-				.getResultList());
+		List<Emission> emissions = jpaService.runInTransaction(em -> {
+			Country country = em.find(Country.class, this.country.getId());
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaQuery<Emission> cr = cb.createQuery(Emission.class);
+			Root<Emission> root = cr.from(Emission.class);
+			cr.select(root).where(cb.equal(root.get("country"), country));
+			List<Emission> result = em.createQuery(cr).getResultList();
+			return result;
+		});
+
 		years = emissions.stream().map(e -> String.valueOf(e.getYear())).collect(Collectors.toList());
 		amounts = emissions.stream().map(e -> e.getAmount()).collect(Collectors.toList());
 		dataSet.setData(amounts);
@@ -64,12 +83,6 @@ public class EmissionController implements Serializable {
 		dataSet.setTension(0.1);
 		data.addChartDataSet(dataSet);
 		data.setLabels(years);
-		LineChartOptions options = new LineChartOptions();
-		Title title = new Title();
-		title.setDisplay(true);
-		title.setText("Emission");
-		options.setTitle(title);
-		model.setOptions(options);
 		model.setData(data);
 		return model;
 	}
@@ -83,28 +96,43 @@ public class EmissionController implements Serializable {
 	}
 
 	public void setEmissions() {
-		if (country.getCode() != null) {
+		if (country.getCode() != null && country.getId() != null) {
 			emissions.clear();
-			emissions.addAll(jpaService.runInTransaction(em -> em.createQuery(
-					String.format("select year, amount, published from emission where country_code=\"%s\" order by year",
-							country.getCode()),
-					Emission.class).getResultList()));
+			emissions.addAll(jpaService.runInTransaction(em -> {
+				Country country = em.find(Country.class, this.country.getId());
+				CriteriaBuilder cb = em.getCriteriaBuilder();
+				CriteriaQuery<Emission> cq = cb.createQuery(Emission.class);
+				Root<Emission> root = cq.from(Emission.class);
+				cq.select(root).where(cb.equal(root.get("country"), country))
+						.orderBy(cb.asc(root.get("emission_year")));
+				List<Emission> result = em.createQuery(cq).getResultList();
+				return result;
+			}));
 		}
 	}
 
 	public void add() {
 		List<Integer> years = getYears();
 		if (!years.contains(Integer.valueOf(emission.getYear()))) {
-			jpaService.runInTransaction(em -> em
-					.merge(new Emission(emission.getYear(), emission.getAmount(), emission.isPublished(), country)));
-			emissions.add(emission);
+			jpaService.runInTransaction(em -> {
+				Country country = em.find(Country.class, this.country.getId());
+				Credentials owner = em.find(Credentials.class, this.owner.getId());
+				Emission emission = new Emission(this.emission.getYear(), this.emission.getAmount(),
+						this.emission.isEditable(), country, owner);
+				em.persist(emission);
+				emissions.add(emission);
+				return null;
+			});
 			Collections.sort(emissions);
 		}
 	}
 
 	public void remove() {
+		if (selectedEmission.getId() == null || !selectedEmission.getOwner().equals(this.owner.getUsername()))
+			return;
 		jpaService.runInTransaction(em -> {
-			em.remove(selectedEmission);
+			Emission emission = em.find(Emission.class, selectedEmission.getId());
+			em.remove(emission);
 			return null;
 		});
 		emissions.remove(selectedEmission);
@@ -115,26 +143,49 @@ public class EmissionController implements Serializable {
 		if (country.getCode() == null) {
 			return years;
 		}
-		years.addAll(jpaService.runInTransaction(em -> em
-				.createQuery(String.format("select year from emission where country_code=\"%s\" order by year",
-						country.getCode()), Emission.class)
-				.getResultStream().map(e -> e.getYear()).collect(Collectors.toList())));
+		years.addAll(jpaService.runInTransaction(em -> {
+			Country country = em.find(Country.class, this.country.getId());
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaQuery<Emission> cq = cb.createQuery(Emission.class);
+			Root<Emission> root = cq.from(Emission.class);
+			cq.select(root).where(cb.equal(root.get("country"), country)).orderBy(cb.asc(root.get("emission_year")));
+			List<Integer> result = em.createQuery(cq).getResultStream().map(e -> e.getYear())
+					.collect(Collectors.toList());
+			return result;
+		}));
 		return years;
 	}
 
 	public void update(RowEditEvent<Emission> event) {
-		Emission emission = event.getObject();
+		Emission eventEmission = event.getObject();
 		jpaService.runInTransaction(em -> {
+			Emission emission = em.find(Emission.class, eventEmission.getId());
+			if (emission.isEditable()) {
+				emission.setAmount(eventEmission.getAmount());
+			} else if (emission.getOwner().equals(owner.getUsername())) {
+				emission.setAmount(eventEmission.getAmount());
+				emission.setEditable(eventEmission.isEditable());
+			}
 			em.persist(emission);
 			return null;
 		});
 	}
 
-	public void setPublished(boolean published) {
-		jpaService.runInTransaction(
-				em -> em.createQuery(String.format("update emission set published=%s where country_code=\"%s\"",
-						published, country.getCode()), Emission.class).getResultList());
-		emissions.forEach(emission -> emission.setPublished(published));
+	public void setEditable(boolean editable) {
+		jpaService.runInTransaction(em -> {
+			Country country = em.find(Country.class, this.country.getId());
+			Credentials owner = em.find(Credentials.class, this.owner.getId());
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaUpdate<Emission> cu = cb.createCriteriaUpdate(Emission.class);
+			Root<Emission> root = cu.from(Emission.class);
+			cu.set("emission_editable", editable);
+			cu.where(cb.and(cb.equal(root.get("country"), country), cb.equal(root.get("owner"), owner)));
+			em.createQuery(cu).executeUpdate();
+			return null;
+		});
+		emissions.forEach(
+				emission -> emission.setEditable(emission.getOwner().equals(this.owner.getUsername()) && editable
+						|| (!emission.getOwner().equals(this.owner.getUsername()) && emission.isEditable())));
 	}
 
 	public Emission getSelectedEmission() {

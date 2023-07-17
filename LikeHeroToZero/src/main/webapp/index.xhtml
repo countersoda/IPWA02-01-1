@@ -24,6 +24,12 @@
 			<f:ajax value="process" execute="password username" />
 		</p:commandButton>
 	</h:form>
+	<h:panelGroup style="position: absolute; top: 20px; left: 20px;"
+		rendered="#{credentialsController.isLoggedIn()}">
+		<i class="pi pi-user"></i>
+		<h:outputText style="margin-left:0.5rem;"
+			value="#{credentials.username}"></h:outputText>
+	</h:panelGroup>
 	<h:form>
 		<p:selectOneMenu id="selectCountry" converter="countryConverter"
 			value="#{country}" style="margin-top:2rem">
@@ -37,6 +43,5 @@
 	<p:lineChart id="emissionChart"
 		model="#{emissionController.emissionModel}"
 		style="width: 100%; height: 500px;" />
-
 </h:body>
 </html>

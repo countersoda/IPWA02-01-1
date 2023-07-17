@@ -8,7 +8,11 @@ import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import jakarta.servlet.http.HttpSession;
+import model.Country;
 import model.Credentials;
 import service.JPAService;
 
@@ -42,16 +46,21 @@ public class CredentialsController implements Serializable {
 	public void login() throws IOException {
 		FacesContext facesContext = FacesContext.getCurrentInstance();
 		ExternalContext context = facesContext.getExternalContext();
-		Credentials user = jpaService.runInTransaction(em -> em.createQuery(
-				String.format("select username, password from user where username='%s'", credentials.getUsername()),
-				Credentials.class).getSingleResult());
-
+		Credentials user = jpaService.runInTransaction(em -> {
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaQuery<Credentials> cr = cb.createQuery(Credentials.class);
+			Root<Credentials> root = cr.from(Credentials.class);
+			cr.select(root);
+			cr.where(cb.equal(root.get("username"), credentials.getUsername()));
+			return em.createQuery(cr).getSingleResult();
+		});
 		if (user.getUsername() != null && user.getPassword() != null
 				&& user.getUsername().equals(credentials.getUsername())
 				&& user.getPassword().equals(credentials.getPassword())) {
 			HttpSession session = (HttpSession) context.getSession(false);
 			session.setMaxInactiveInterval(300);
 			session.setAttribute("username", user.getUsername());
+			credentials.setId(user.getId());
 			context.redirect("dashboard.xhtml");
 		} else {
 			context.redirect("login.xhtml");

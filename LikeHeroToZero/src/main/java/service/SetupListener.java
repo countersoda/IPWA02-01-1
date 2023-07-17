@@ -2,22 +2,16 @@ package service;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException;
-import org.hibernate.exception.ConstraintViolationException;
 
-import jakarta.persistence.EntityExistsException;
-import jakarta.persistence.RollbackException;
-import jakarta.persistence.TransactionRequiredException;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 import model.Country;
+import model.Credentials;
 import model.Emission;
 
 @WebListener
@@ -35,7 +29,18 @@ public class SetupListener implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent sce) {
 		jpaService.runInTransaction(em -> {
 			try {
+				Credentials user = new Credentials();
+				user.setUsername("test");
+				user.setPassword("test");
+				em.persist(user);
+
+				Credentials user2 = new Credentials();
+				user2.setUsername("test2");
+				user2.setPassword("test");
+				em.persist(user2);
+
 				String data = readFile("co2_emission.csv");
+				Map<String, Country> countryStore = new HashMap<String, Country>();
 				for (String line : data.split("\n")) {
 					String[] values = line.split(";");
 					String name = values[0].trim();
@@ -44,11 +49,14 @@ public class SetupListener implements ServletContextListener {
 					String amount = values[5].trim();
 					if (name.equals("country_name") || amount.isBlank())
 						continue;
-					Country country = new Country();
-					country.setName(name);
-					country.setCode(code);
-					em.persist(country);
-					em.persist(new Emission(Integer.parseInt(year), Float.parseFloat(amount), false, country));
+					Country country;
+					if (!countryStore.containsKey(code)) {
+						country = new Country(name, code);
+						countryStore.put(code, country);
+					} else {
+						country = countryStore.get(code);
+					}
+					em.persist(new Emission(Integer.parseInt(year), Float.parseFloat(amount), false, country, user));
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
