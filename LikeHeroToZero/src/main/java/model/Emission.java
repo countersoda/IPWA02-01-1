@@ -12,13 +12,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 
 @Named
 @ViewScoped
 @Entity
 public class Emission implements Serializable, Comparable<Emission> {
+
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -35,8 +35,8 @@ public class Emission implements Serializable, Comparable<Emission> {
 	private boolean emission_editable;
 
 	@ManyToOne(cascade = CascadeType.PERSIST)
-	@JoinColumn(name = "user_id")
-	private Credentials owner;
+	@JoinColumn(name = "owner_id")
+	private Credential owner;
 
 	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "country_id")
@@ -45,7 +45,7 @@ public class Emission implements Serializable, Comparable<Emission> {
 	public Emission() {
 	}
 
-	public Emission(int year, float amount, boolean editable, Country country, Credentials owner) {
+	public Emission(int year, float amount, boolean editable, Country country, Credential owner) {
 		this.emission_year = year;
 		this.emission_amount = amount;
 		this.emission_editable = editable;

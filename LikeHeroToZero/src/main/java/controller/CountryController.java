@@ -19,6 +19,7 @@ import service.JPAService;
 @ViewScoped
 public class CountryController implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private @Inject Country country;
 	private static final JPAService jpaService = JPAService.getInstance();
 	private List<Country> countries = new ArrayList<Country>();

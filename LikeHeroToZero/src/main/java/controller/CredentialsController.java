@@ -12,15 +12,15 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import jakarta.servlet.http.HttpSession;
-import model.Country;
-import model.Credentials;
+import model.Credential;
 import service.JPAService;
 
 @Named
 @SessionScoped
 public class CredentialsController implements Serializable {
 
-	private @Inject Credentials credentials;
+	private static final long serialVersionUID = 1L;
+	private @Inject Credential credential;
 	private static final JPAService jpaService = JPAService.getInstance();
 
 	public CredentialsController() {
@@ -35,7 +35,7 @@ public class CredentialsController implements Serializable {
 	}
 
 	public void logout() throws IOException {
-		credentials = null;
+		credential = null;
 		FacesContext facesContext = FacesContext.getCurrentInstance();
 		ExternalContext context = facesContext.getExternalContext();
 		HttpSession session = (HttpSession) context.getSession(false);
@@ -46,21 +46,21 @@ public class CredentialsController implements Serializable {
 	public void login() throws IOException {
 		FacesContext facesContext = FacesContext.getCurrentInstance();
 		ExternalContext context = facesContext.getExternalContext();
-		Credentials user = jpaService.runInTransaction(em -> {
+		Credential user = jpaService.runInTransaction(em -> {
 			CriteriaBuilder cb = em.getCriteriaBuilder();
-			CriteriaQuery<Credentials> cr = cb.createQuery(Credentials.class);
-			Root<Credentials> root = cr.from(Credentials.class);
+			CriteriaQuery<Credential> cr = cb.createQuery(Credential.class);
+			Root<Credential> root = cr.from(Credential.class);
 			cr.select(root);
-			cr.where(cb.equal(root.get("username"), credentials.getUsername()));
+			cr.where(cb.equal(root.get("username"), credential.getUsername()));
 			return em.createQuery(cr).getSingleResult();
 		});
 		if (user.getUsername() != null && user.getPassword() != null
-				&& user.getUsername().equals(credentials.getUsername())
-				&& user.getPassword().equals(credentials.getPassword())) {
+				&& user.getUsername().equals(credential.getUsername())
+				&& user.getPassword().equals(credential.getPassword())) {
 			HttpSession session = (HttpSession) context.getSession(false);
 			session.setMaxInactiveInterval(300);
 			session.setAttribute("username", user.getUsername());
-			credentials.setId(user.getId());
+			credential.setId(user.getId());
 			context.redirect("dashboard.xhtml");
 		} else {
 			context.redirect("login.xhtml");

@@ -23,7 +23,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.criteria.Root;
 import model.Country;
-import model.Credentials;
+import model.Credential;
 import model.Emission;
 import service.JPAService;
 
@@ -31,11 +31,12 @@ import service.JPAService;
 @ViewScoped
 public class EmissionController implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private @Inject Country country;
+	private @Inject Credential owner;
 	private @Inject Emission emission;
-	private @Inject Credentials owner;
-	private List<Emission> emissions = new ArrayList<Emission>();
 	private Emission selectedEmission;
+	private List<Emission> emissions = new ArrayList<Emission>();
 	private LineChartModel model = new LineChartModel();
 	private static final JPAService jpaService = JPAService.getInstance();
 
@@ -116,7 +117,7 @@ public class EmissionController implements Serializable {
 		if (!years.contains(Integer.valueOf(emission.getYear()))) {
 			jpaService.runInTransaction(em -> {
 				Country country = em.find(Country.class, this.country.getId());
-				Credentials owner = em.find(Credentials.class, this.owner.getId());
+				Credential owner = em.find(Credential.class, this.owner.getId());
 				Emission emission = new Emission(this.emission.getYear(), this.emission.getAmount(),
 						this.emission.isEditable(), country, owner);
 				em.persist(emission);
@@ -127,6 +128,21 @@ public class EmissionController implements Serializable {
 		}
 	}
 
+	public void update(RowEditEvent<Emission> event) {
+		Emission eventEmission = event.getObject();
+		jpaService.runInTransaction(em -> {
+			Emission emission = em.find(Emission.class, eventEmission.getId());
+			if (emission.isEditable()) {
+				emission.setAmount(eventEmission.getAmount());
+			} else if (emission.getOwner().equals(owner.getUsername())) {
+				emission.setAmount(eventEmission.getAmount());
+				emission.setEditable(eventEmission.isEditable());
+			}
+			em.persist(emission);
+			return null;
+		});
+	}
+	
 	public void remove() {
 		if (selectedEmission.getId() == null || !selectedEmission.getOwner().equals(this.owner.getUsername()))
 			return;
@@ -156,25 +172,10 @@ public class EmissionController implements Serializable {
 		return years;
 	}
 
-	public void update(RowEditEvent<Emission> event) {
-		Emission eventEmission = event.getObject();
-		jpaService.runInTransaction(em -> {
-			Emission emission = em.find(Emission.class, eventEmission.getId());
-			if (emission.isEditable()) {
-				emission.setAmount(eventEmission.getAmount());
-			} else if (emission.getOwner().equals(owner.getUsername())) {
-				emission.setAmount(eventEmission.getAmount());
-				emission.setEditable(eventEmission.isEditable());
-			}
-			em.persist(emission);
-			return null;
-		});
-	}
-
 	public void setEditable(boolean editable) {
 		jpaService.runInTransaction(em -> {
 			Country country = em.find(Country.class, this.country.getId());
-			Credentials owner = em.find(Credentials.class, this.owner.getId());
+			Credential owner = em.find(Credential.class, this.owner.getId());
 			CriteriaBuilder cb = em.getCriteriaBuilder();
 			CriteriaUpdate<Emission> cu = cb.createCriteriaUpdate(Emission.class);
 			Root<Emission> root = cu.from(Emission.class);
