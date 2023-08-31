@@ -6,30 +6,35 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.primefaces.event.RowEditEvent;
+import org.primefaces.event.CellEditEvent;
 import org.primefaces.model.charts.ChartData;
 import org.primefaces.model.charts.line.LineChartDataSet;
 import org.primefaces.model.charts.line.LineChartModel;
 import org.primefaces.model.charts.line.LineChartOptions;
 import org.primefaces.model.charts.optionconfig.title.Title;
 
+import beans.CountryBean;
+import beans.CredentialBean;
+import beans.EmissionBean;
 import jakarta.annotation.PostConstruct;
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import model.Country;
-import model.Credential;
+import jakarta.servlet.http.HttpServletRequest;
 import model.Emission;
 import service.EmissionService;
+import types.Role;
 
 @Named
 @ViewScoped
 public class EmissionController implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private @Inject Country country;
-	private @Inject Credential author;
-	private @Inject Emission emission;
+	private @Inject CountryBean country;
+	private @Inject CredentialBean user;
+	private @Inject EmissionBean emission;
 	private @Inject EmissionService emissionService;
 	private Emission selectedEmission;
 	private List<Emission> emissions = new ArrayList<Emission>();
@@ -68,7 +73,7 @@ public class EmissionController implements Serializable {
 		if (country.getCode() == null || country.getId() == null) {
 			return model;
 		}
-		List<Emission> emissions = emissionService.findAllByCountry(country);
+		List<Emission> emissions = emissionService.findAllByCountry(country, false);
 		years = emissions.stream().map(e -> String.valueOf(e.getYear())).collect(Collectors.toList());
 		amounts = emissions.stream().map(e -> e.getAmount()).collect(Collectors.toList());
 		dataSet.setData(amounts);
@@ -91,47 +96,49 @@ public class EmissionController implements Serializable {
 	}
 
 	public void setEmissions() {
+		FacesContext facesContext = FacesContext.getCurrentInstance();
+		ExternalContext context = facesContext.getExternalContext();
+		HttpServletRequest request = (HttpServletRequest) context.getRequest();
+		String path = request.getRequestURI();
+		boolean draft = false;
+		if (path.contains("dashboard") && this.user != null && this.user.getRole() == Role.Publisher) {
+			draft = true;
+		}
 		if (country.getCode() != null && country.getId() != null) {
 			emissions.clear();
-			emissions.addAll(emissionService.findAllByCountry(country));
+			emissions.addAll(emissionService.findAllByCountry(country, draft));
 		}
 	}
 
 	public void add() {
-		List<Integer> years = getYears();
-		if (!years.contains(Integer.valueOf(emission.getYear()))) {
-			Emission newEmission = emissionService.add(emission, country, author);
-			emissions.add(newEmission);
-			Collections.sort(emissions);
-		}
+		this.emission.setCountry(this.country);
+		Emission newEmission = emissionService.add(this.emission);
+		this.emissions.add(newEmission);
+		Collections.sort(this.emissions);
 	}
 
-	public void update(RowEditEvent<Emission> event) {
-		Emission eventEmission = event.getObject();
-		emissionService.update(eventEmission, author);
+	public void add(Emission emission) {
+		emission.setDraft(false);
+		emissionService.update(emission);
+		this.emissions.remove(emission);
+		Collections.sort(this.emissions);
+	}
+
+	public void update(CellEditEvent<Emission> event) {
+		Integer i = event.getRowIndex();
+		Emission emission = emissions.get(i);
+		System.out.print("Edit: ");
+		System.out.println(emission);
+		Emission newEmission = emissionService.add(emission);
+		emissions.add(newEmission);
+		Collections.sort(emissions);
 	}
 
 	public void remove() {
-		if (selectedEmission.getId() == null || !selectedEmission.getOwner().equals(this.author.getUsername()))
+		if (selectedEmission.getId() == null)
 			return;
 		emissionService.removeById(selectedEmission.getId());
 		emissions.remove(selectedEmission);
-	}
-
-	public List<Integer> getYears() {
-		List<Integer> years = new ArrayList<Integer>();
-		if (country.getCode() == null) {
-			return years;
-		}
-		years.addAll(emissionService.findYearsByCountryId(country.getId()));
-		return years;
-	}
-
-	public void updateAllEditable(boolean editable) {
-		emissionService.updateAllEditable(this.country.getId(), this.author.getId(), editable);
-		emissions.forEach(
-				emission -> emission.setEditable(emission.getOwner().equals(this.author.getUsername()) && editable
-						|| (!emission.getOwner().equals(this.author.getUsername()) && emission.isEditable())));
 	}
 
 }

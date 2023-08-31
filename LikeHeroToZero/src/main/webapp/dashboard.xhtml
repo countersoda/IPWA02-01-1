@@ -45,59 +45,38 @@
 				<p:inputText value="#{emission.year}" />
 				<p:outputLabel value="Amount of CO₂" />
 				<p:inputText value="#{emission.amount}" />
-				<p:selectBooleanCheckbox value="#{emission.editable}"
-					itemLabel="Publish">
-				</p:selectBooleanCheckbox>
 				<p:commandButton value="Save" action="#{emissionController.add()}"
 					render="emissionTableForm" update="emissionTableForm" />
 			</p:panelGrid>
 		</h:form>
-		<p:panelGrid columns="2">
-			<p:commandButton value="Publish all"
-				action="#{emissionController.updateAllEditable(true)}"
-				update="emissionTableForm" render="emissionTableForm"></p:commandButton>
-			<p:commandButton value="Unpublish all"
-				action="#{emissionController.updateAllEditable(false)}"
-				update="emissionTableForm" render="emissionTableForm"></p:commandButton>
-		</p:panelGrid>
+		<p:remoteCommand name="onCellEdit"
+			action="#{emissionController.update}" update="emissionTableForm" />
 		<h:form id="emissionTableForm">
 			<p:dataTable id="emissionTable"
 				value="#{emissionController.emissions}" stripedRows="true" var="val"
 				editable="true" selection="#{emissionController.selectedEmission}"
 				selectionMode="single" rowKey="#{val.year}">
-				<p:ajax event="rowEdit" listener="#{emissionController.update}"></p:ajax>
+				<p:ajax event="cellEdit" oncomplete="onCellEdit()"></p:ajax>
 				<p:column headerText="Year">
 					<h:outputText value="#{val.year}" />
 				</p:column>
-				<p:column headerText="Amount"
-					disabled="#{val.owner == credential.username or val.editable}">
+				<p:column headerText="Amount">
 					<p:cellEditor>
 						<f:facet name="output">
 							<h:outputText value="#{val.amount}"></h:outputText>
 							<h:outputLabel value=" kt"></h:outputLabel>
 						</f:facet>
 						<f:facet name="input">
-							<h:inputText value="#{val.amount}"
-								disabled="#{val.owner != credential.username and !val.editable}"></h:inputText>
+							<h:inputText value="#{val.amount}"></h:inputText>
 						</f:facet>
 					</p:cellEditor>
 				</p:column>
-				<p:column headerText="Editable" style="display:flex">
-					<p:cellEditor>
-						<f:facet name="output">
-							<p:selectBooleanCheckbox value="#{val.editable}"
-								itemLabel="Editable" disabled="true">
-							</p:selectBooleanCheckbox>
-						</f:facet>
-						<f:facet name="input">
-							<p:selectBooleanCheckbox value="#{val.editable}"
-								itemLabel="Editable"
-								disabled="#{val.owner != credential.username}">
-							</p:selectBooleanCheckbox>
-						</f:facet>
-					</p:cellEditor>
-					<p:rowEditor
-						rendered="#{val.owner == credential.username or val.editable}" />
+				<p:column headerText="Draft" style="display:flex">
+					<p:commandButton value="Approve"
+						action="#{emissionController.add(val)}" rendered="#{val.draft and credentialController.isPublisher()}">
+						<f:ajax update="@this emissionTableForm" render="@this emissionTableForm" />
+					</p:commandButton>
+					<p:rowEditor />
 				</p:column>
 			</p:dataTable>
 			<p:contextMenu for="emissionTable">

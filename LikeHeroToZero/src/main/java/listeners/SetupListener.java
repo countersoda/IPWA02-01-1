@@ -14,6 +14,7 @@ import model.Country;
 import model.Credential;
 import model.Emission;
 import service.JPAService;
+import types.Role;
 
 @WebListener
 public class SetupListener implements ServletContextListener {
@@ -36,11 +37,13 @@ public class SetupListener implements ServletContextListener {
 			Credential user = new Credential();
 			user.setUsername("test");
 			user.setPassword("test");
+			user.setRole(Role.Publisher);
 			em.persist(user);
 
 			Credential user2 = new Credential();
 			user2.setUsername("test2");
 			user2.setPassword("test");
+			user2.setRole(Role.Researcher);
 			em.persist(user2);
 
 			String data = readFile("co2_emission.csv");
@@ -63,7 +66,7 @@ public class SetupListener implements ServletContextListener {
 				} else {
 					country = countryMap.get(code);
 				}
-				em.persist(new Emission(Integer.parseInt(year), Float.parseFloat(amount), false, country, user));
+				em.persist(new Emission(Integer.parseInt(year), Float.parseFloat(amount), false, country));
 			}
 			return null;
 		});

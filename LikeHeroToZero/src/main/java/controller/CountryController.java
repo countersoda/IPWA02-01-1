@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import beans.CountryBean;
 import jakarta.annotation.PostConstruct;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
@@ -18,7 +19,7 @@ public class CountryController implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private @Inject Country country;
+	private @Inject CountryBean country;
 	private @Inject CountryService countryService;
 	private List<Country> countries = new ArrayList<Country>();
 

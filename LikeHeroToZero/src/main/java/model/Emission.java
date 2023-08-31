@@ -1,9 +1,5 @@
 package model;
 
-import java.io.Serializable;
-
-import jakarta.faces.view.ViewScoped;
-import jakarta.inject.Named;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,12 +9,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
-@Named
-@ViewScoped
 @Entity
-public class Emission implements Serializable, Comparable<Emission> {
-
-	private static final long serialVersionUID = 1L;
+public class Emission implements Comparable<Emission> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -31,12 +23,8 @@ public class Emission implements Serializable, Comparable<Emission> {
 	@Column(name = "emission_amount", nullable = false)
 	private float amount;
 
-	@Column(name = "emission_editable", nullable = false)
-	private boolean editable;
-
-	@ManyToOne(cascade = CascadeType.PERSIST)
-	@JoinColumn(name = "author_id")
-	private Credential author;
+	@Column(name = "emission_draft", nullable = false)
+	private boolean draft;
 
 	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "country_id")
@@ -45,25 +33,20 @@ public class Emission implements Serializable, Comparable<Emission> {
 	public Emission() {
 	}
 
-	public Emission(int year, float amount, boolean editable, Country country, Credential author) {
+	public Emission(int year, float amount, boolean draft, Country country) {
 		this.year = year;
 		this.amount = amount;
-		this.editable = editable;
 		this.country = country;
-		this.author = author;
+		this.draft = draft;
 	}
 
 	public Integer getId() {
 		return this.id;
 	}
 
-	public String getOwner() {
-		return this.author.getUsername();
-	}
-
 	@Override
 	public String toString() {
-		return String.format("%d; %f; %b", this.year, this.amount, this.editable);
+		return String.format("%d - %f - %b", this.year, this.amount, this.draft);
 	}
 
 	public float getAmount() {
@@ -82,12 +65,20 @@ public class Emission implements Serializable, Comparable<Emission> {
 		this.year = year;
 	}
 
-	public boolean isEditable() {
-		return editable;
+	public boolean isDraft() {
+		return draft;
 	}
 
-	public void setEditable(boolean editable) {
-		this.editable = editable;
+	public void setDraft(boolean editable) {
+		this.draft = editable;
+	}
+
+	public Country getCountry() {
+		return country;
+	}
+
+	public void setCountry(Country country) {
+		this.country = country;
 	}
 
 	@Override

@@ -1,25 +1,14 @@
 package model;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import jakarta.enterprise.context.SessionScoped;
-import jakarta.inject.Named;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import types.Role;
 
-@Named
-@SessionScoped
 @Entity
-public class Credential implements Serializable {
-
-	private static final long serialVersionUID = 1L;
+public class Credential {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -32,8 +21,8 @@ public class Credential implements Serializable {
 	@Column(name = "password", nullable = false)
 	private String password;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "author")
-	private List<Emission> emissions = new ArrayList<>();
+	@Column(name = "role", nullable = false)
+	private Role role;
 
 	public Integer getId() {
 		return id;
@@ -57,5 +46,18 @@ public class Credential implements Serializable {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public Role getRole() {
+		return role;
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%s - %s", this.username, this.role);
 	}
 }

@@ -1,11 +1,8 @@
 package model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.faces.view.ViewScoped;
-import jakarta.inject.Named;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,12 +11,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 
-@Named
-@ViewScoped
 @Entity
-public class Country implements Serializable, Comparable<Country> {
-
-	private static final long serialVersionUID = 1L;
+public class Country implements Comparable<Country> {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -65,6 +58,14 @@ public class Country implements Serializable, Comparable<Country> {
 
 	public void setId(Integer id) {
 		this.id = id;
+	}
+
+	public List<Emission> getEmissions() {
+		return emissions;
+	}
+
+	public void setEmissions(List<Emission> emissions) {
+		this.emissions = emissions;
 	}
 
 	@Override

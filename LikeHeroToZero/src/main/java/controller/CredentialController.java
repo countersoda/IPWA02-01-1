@@ -3,6 +3,7 @@ package controller;
 import java.io.IOException;
 import java.io.Serializable;
 
+import beans.CredentialBean;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
@@ -11,13 +12,14 @@ import jakarta.inject.Named;
 import jakarta.servlet.http.HttpSession;
 import model.Credential;
 import service.CredentialService;
+import types.Role;
 
 @Named
 @SessionScoped
 public class CredentialController implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private @Inject Credential credential;
+	private @Inject CredentialBean credential;
 	private @Inject CredentialService credentialService;
 
 	public CredentialController() {
@@ -51,10 +53,15 @@ public class CredentialController implements Serializable {
 			session.setMaxInactiveInterval(300);
 			session.setAttribute("username", user.getUsername());
 			credential.setId(user.getId());
+			credential.setRole(user.getRole());
 			context.redirect("dashboard.xhtml");
 		} else {
 			context.redirect("login.xhtml");
 		}
 
+	}
+	
+	public boolean isPublisher() {
+		return this.credential.getRole() == Role.Publisher;
 	}
 }
