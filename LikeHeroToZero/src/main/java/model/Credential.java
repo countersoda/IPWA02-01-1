@@ -23,7 +23,7 @@ public class Credential implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "owner_id")
+	@Column(name = "author_id")
 	private Integer id;
 
 	@Column(name = "username", nullable = false, unique = true)
@@ -32,7 +32,7 @@ public class Credential implements Serializable {
 	@Column(name = "password", nullable = false)
 	private String password;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "author")
 	private List<Emission> emissions = new ArrayList<>();
 
 	public Integer getId() {

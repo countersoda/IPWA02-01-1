@@ -1,4 +1,4 @@
-package service;
+package converters;
 
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
@@ -8,6 +8,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import model.Country;
+import service.JPAService;
 
 @FacesConverter(value = "countryConverter")
 public class CountryConverter implements Converter<Country> {

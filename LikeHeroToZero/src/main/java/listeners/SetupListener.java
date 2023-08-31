@@ -1,4 +1,4 @@
-package service;
+package listeners;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +13,7 @@ import jakarta.servlet.annotation.WebListener;
 import model.Country;
 import model.Credential;
 import model.Emission;
+import service.JPAService;
 
 @WebListener
 public class SetupListener implements ServletContextListener {
@@ -43,7 +44,7 @@ public class SetupListener implements ServletContextListener {
 			em.persist(user2);
 
 			String data = readFile("co2_emission.csv");
-			if(data == null) {
+			if (data == null) {
 				return null;
 			}
 			Map<String, Country> countryMap = new HashMap<String, Country>();

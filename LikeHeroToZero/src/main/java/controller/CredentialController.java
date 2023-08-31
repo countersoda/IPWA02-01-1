@@ -8,22 +8,19 @@ import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
 import jakarta.servlet.http.HttpSession;
 import model.Credential;
-import service.JPAService;
+import service.CredentialService;
 
 @Named
 @SessionScoped
-public class CredentialsController implements Serializable {
+public class CredentialController implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private @Inject Credential credential;
-	private static final JPAService jpaService = JPAService.getInstance();
+	private @Inject CredentialService credentialService;
 
-	public CredentialsController() {
+	public CredentialController() {
 	}
 
 	public boolean isLoggedIn() {
@@ -46,14 +43,7 @@ public class CredentialsController implements Serializable {
 	public void login() throws IOException {
 		FacesContext facesContext = FacesContext.getCurrentInstance();
 		ExternalContext context = facesContext.getExternalContext();
-		Credential user = jpaService.runInTransaction(em -> {
-			CriteriaBuilder cb = em.getCriteriaBuilder();
-			CriteriaQuery<Credential> cr = cb.createQuery(Credential.class);
-			Root<Credential> root = cr.from(Credential.class);
-			cr.select(root);
-			cr.where(cb.equal(root.get("username"), credential.getUsername()));
-			return em.createQuery(cr).getSingleResult();
-		});
+		Credential user = credentialService.findByUsername(credential.getUsername());
 		if (user.getUsername() != null && user.getPassword() != null
 				&& user.getUsername().equals(credential.getUsername())
 				&& user.getPassword().equals(credential.getPassword())) {

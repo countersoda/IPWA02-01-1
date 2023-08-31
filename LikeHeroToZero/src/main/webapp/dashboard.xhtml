@@ -12,18 +12,18 @@
 	<h1 style="text-align: center;">Dashboard</h1>
 	<h:form style="position:absolute; top:20px; right:20px;">
 		<p:link value="Home" outcome="/index.xhtml" style="margin-right:1rem;"
-			rendered="#{credentialsController.isLoggedIn()}">
+			rendered="#{credentialController.isLoggedIn()}">
 		</p:link>
 		<p:commandButton value="Logout"
-			action="#{credentialsController.logout()}"
-			rendered="#{credentialsController.isLoggedIn()}">
+			action="#{credentialController.logout()}"
+			rendered="#{credentialController.isLoggedIn()}">
 			<f:ajax value="process" execute="password username" />
 		</p:commandButton>
 	</h:form>
 	<div style="position: absolute; top: 20px; left: 20px;">
 		<i class="pi pi-user"></i>
 		<h:outputText style="margin-left:0.5rem;"
-			value="#{credentials.username}"></h:outputText>
+			value="#{credential.username}"></h:outputText>
 	</div>
 
 	<div
@@ -54,10 +54,10 @@
 		</h:form>
 		<p:panelGrid columns="2">
 			<p:commandButton value="Publish all"
-				action="#{emissionController.setEditable(true)}"
+				action="#{emissionController.updateAllEditable(true)}"
 				update="emissionTableForm" render="emissionTableForm"></p:commandButton>
 			<p:commandButton value="Unpublish all"
-				action="#{emissionController.setEditable(false)}"
+				action="#{emissionController.updateAllEditable(false)}"
 				update="emissionTableForm" render="emissionTableForm"></p:commandButton>
 		</p:panelGrid>
 		<h:form id="emissionTableForm">
@@ -70,7 +70,7 @@
 					<h:outputText value="#{val.year}" />
 				</p:column>
 				<p:column headerText="Amount"
-					disabled="#{val.owner == credentials.username or val.editable}">
+					disabled="#{val.owner == credential.username or val.editable}">
 					<p:cellEditor>
 						<f:facet name="output">
 							<h:outputText value="#{val.amount}"></h:outputText>
@@ -78,7 +78,7 @@
 						</f:facet>
 						<f:facet name="input">
 							<h:inputText value="#{val.amount}"
-								disabled="#{val.owner != credentials.username and !val.editable}"></h:inputText>
+								disabled="#{val.owner != credential.username and !val.editable}"></h:inputText>
 						</f:facet>
 					</p:cellEditor>
 				</p:column>
@@ -92,12 +92,12 @@
 						<f:facet name="input">
 							<p:selectBooleanCheckbox value="#{val.editable}"
 								itemLabel="Editable"
-								disabled="#{val.owner != credentials.username}">
+								disabled="#{val.owner != credential.username}">
 							</p:selectBooleanCheckbox>
 						</f:facet>
 					</p:cellEditor>
 					<p:rowEditor
-						rendered="#{val.owner == credentials.username or val.editable}" />
+						rendered="#{val.owner == credential.username or val.editable}" />
 				</p:column>
 			</p:dataTable>
 			<p:contextMenu for="emissionTable">

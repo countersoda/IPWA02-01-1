@@ -16,13 +16,13 @@
 		style="display:flex;flex-direction:column;max-width:max-content;">
 		<p:panelGrid columns="2">
 			<h:outputLabel value="Username:" for="username" />
-			<h:inputText id="username" value="#{credentials.username}" size="40" />
+			<h:inputText id="username" value="#{credential.username}" size="40" />
 			<h:outputLabel value="Password: " for="password" />
-			<h:inputSecret id="password" value="#{credentials.password}"
+			<h:inputSecret id="password" value="#{credential.password}"
 				size="40" />
 		</p:panelGrid>
 		<p:commandButton value="Login"
-			action="#{credentialsController.login()}">
+			action="#{credentialController.login()}">
 			<f:ajax value="process" execute="password username" />
 		</p:commandButton>
 	</h:form>

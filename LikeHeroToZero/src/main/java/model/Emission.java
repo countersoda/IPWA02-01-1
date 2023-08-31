@@ -26,17 +26,17 @@ public class Emission implements Serializable, Comparable<Emission> {
 	private Integer id;
 
 	@Column(name = "emission_year", nullable = false)
-	private int emission_year;
+	private int year;
 
 	@Column(name = "emission_amount", nullable = false)
-	private float emission_amount;
+	private float amount;
 
-	@Column(name = "emission_published", nullable = false)
-	private boolean emission_editable;
+	@Column(name = "emission_editable", nullable = false)
+	private boolean editable;
 
 	@ManyToOne(cascade = CascadeType.PERSIST)
-	@JoinColumn(name = "owner_id")
-	private Credential owner;
+	@JoinColumn(name = "author_id")
+	private Credential author;
 
 	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "country_id")
@@ -45,12 +45,12 @@ public class Emission implements Serializable, Comparable<Emission> {
 	public Emission() {
 	}
 
-	public Emission(int year, float amount, boolean editable, Country country, Credential owner) {
-		this.emission_year = year;
-		this.emission_amount = amount;
-		this.emission_editable = editable;
+	public Emission(int year, float amount, boolean editable, Country country, Credential author) {
+		this.year = year;
+		this.amount = amount;
+		this.editable = editable;
 		this.country = country;
-		this.owner = owner;
+		this.author = author;
 	}
 
 	public Integer getId() {
@@ -58,40 +58,40 @@ public class Emission implements Serializable, Comparable<Emission> {
 	}
 
 	public String getOwner() {
-		return this.owner.getUsername();
+		return this.author.getUsername();
 	}
 
 	@Override
 	public String toString() {
-		return String.format("%d; %f; %b", this.emission_year, this.emission_amount, this.emission_editable);
+		return String.format("%d; %f; %b", this.year, this.amount, this.editable);
 	}
 
 	public float getAmount() {
-		return emission_amount;
+		return amount;
 	}
 
 	public void setAmount(float amount) {
-		this.emission_amount = amount;
+		this.amount = amount;
 	}
 
 	public int getYear() {
-		return emission_year;
+		return year;
 	}
 
 	public void setYear(int year) {
-		this.emission_year = year;
+		this.year = year;
 	}
 
 	public boolean isEditable() {
-		return emission_editable;
+		return editable;
 	}
 
 	public void setEditable(boolean editable) {
-		this.emission_editable = editable;
+		this.editable = editable;
 	}
 
 	@Override
 	public int compareTo(Emission o) {
-		return this.emission_year - o.emission_year;
+		return this.year - o.year;
 	}
 }
