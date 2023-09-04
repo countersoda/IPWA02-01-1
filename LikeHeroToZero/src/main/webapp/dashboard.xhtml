@@ -17,7 +17,6 @@
 		<p:commandButton value="Logout"
 			action="#{credentialController.logout()}"
 			rendered="#{credentialController.isLoggedIn()}">
-			<f:ajax value="process" execute="password username" />
 		</p:commandButton>
 	</h:form>
 	<div style="position: absolute; top: 20px; left: 20px;">
@@ -39,24 +38,25 @@
 					listener="#{emissionController.setEmissions()}" />
 			</p:selectOneMenu>
 		</h:form>
-		<h:form id="add" style="margin-top:2rem;">
-			<p:panelGrid columns="6">
+		<h:form id="add" style="margin-top:2rem;margin-bottom:2rem;">
+			<p:panelGrid columns="5">
 				<p:outputLabel value="Year" />
 				<p:inputText value="#{emission.year}" />
 				<p:outputLabel value="Amount of CO₂" />
 				<p:inputText value="#{emission.amount}" />
-				<p:commandButton value="Save" action="#{emissionController.add()}"
-					render="emissionTableForm" update="emissionTableForm" />
+				<p:commandButton value="Create draft"
+					action="#{emissionController.add()}" render="emissionTableForm"
+					update="emissionTableForm" />
 			</p:panelGrid>
 		</h:form>
-		<p:remoteCommand name="onCellEdit"
-			action="#{emissionController.update}" update="emissionTableForm" />
 		<h:form id="emissionTableForm">
 			<p:dataTable id="emissionTable"
 				value="#{emissionController.emissions}" stripedRows="true" var="val"
-				editable="true" selection="#{emissionController.selectedEmission}"
-				selectionMode="single" rowKey="#{val.year}">
-				<p:ajax event="cellEdit" oncomplete="onCellEdit()"></p:ajax>
+				rowKey="#{val.year}">
+				<p:ajax event="rowEdit" listener="#{emissionController.update}"
+					update="@this emissionTableForm" render="@this emissionTableForm">
+				</p:ajax>
+				<p:ajax event="rowEdit" listener="#{emissionController.update}" />
 				<p:column headerText="Year">
 					<h:outputText value="#{val.year}" />
 				</p:column>
@@ -71,19 +71,20 @@
 						</f:facet>
 					</p:cellEditor>
 				</p:column>
-				<p:column headerText="Draft" style="display:flex">
-					<p:commandButton value="Approve"
-						action="#{emissionController.add(val)}" rendered="#{val.draft and credentialController.isPublisher()}">
-						<f:ajax update="@this emissionTableForm" render="@this emissionTableForm" />
+				<p:column
+					rendered="#{val.draft and credentialController.isPublisher()}">
+					<p:commandButton value="Approve" update="@this emissionTableForm"
+						render="@this emissionTableForm"
+						action="#{emissionController.add(val)}">
 					</p:commandButton>
-					<p:rowEditor />
+				</p:column>
+				<p:column rendered="#{credentialController.isPublisher()}">
+					<p:commandButton icon="pi pi-trash"
+						update="@this emissionTableForm" render="@this emissionTableForm"
+						action="#{emissionController.remove(val)}">
+					</p:commandButton>
 				</p:column>
 			</p:dataTable>
-			<p:contextMenu for="emissionTable">
-				<p:menuitem value="Delete" update="@this emissionTable"
-					icon="pi pi-times" render="@this emissionTable"
-					action="#{emissionController.remove}" />
-			</p:contextMenu>
 		</h:form>
 	</div>
 </h:body>

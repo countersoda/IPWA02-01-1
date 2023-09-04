@@ -3,6 +3,7 @@ package service;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -39,8 +40,13 @@ public class EmissionService {
 			Root<Emission> root = cr.from(Emission.class);
 			cr.select(root).where(cb.and(cb.equal(root.get("year"), emission.getYear()),
 					cb.equal(root.get("draft"), false), cb.equal(root.get("country"), emission.getCountry())));
-			Emission result = em.createQuery(cr).getSingleResult();
-			return result;
+			try {
+
+				Emission result = em.createQuery(cr).getSingleResult();
+				return result;
+			} catch (NoResultException e) {
+				return null;
+			}
 		});
 	}
 
@@ -53,13 +59,18 @@ public class EmissionService {
 		});
 	}
 
-	public Emission update(Emission emission) {
+	public boolean update(Emission emission) {
 		return jpaService.runInTransaction(em -> {
 			Emission updateEmission = this.findByYear(emission);
-			updateEmission.setAmount(emission.getAmount());
-			updateEmission.setDraft(emission.isDraft());
-			em.merge(updateEmission);
-			return updateEmission;
+			if (updateEmission != null) {
+				updateEmission.setAmount(emission.getAmount());
+				updateEmission.setDraft(emission.isDraft());
+				em.merge(updateEmission);
+				return true;
+			} else {
+				em.merge(emission);
+				return false;
+			}
 		});
 	}
 

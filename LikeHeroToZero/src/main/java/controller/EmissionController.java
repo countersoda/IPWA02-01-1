@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.primefaces.event.CellEditEvent;
+import org.primefaces.event.RowEditEvent;
 import org.primefaces.model.charts.ChartData;
 import org.primefaces.model.charts.line.LineChartDataSet;
 import org.primefaces.model.charts.line.LineChartModel;
@@ -36,7 +36,6 @@ public class EmissionController implements Serializable {
 	private @Inject CredentialBean user;
 	private @Inject EmissionBean emission;
 	private @Inject EmissionService emissionService;
-	private Emission selectedEmission;
 	private List<Emission> emissions = new ArrayList<Emission>();
 	private LineChartModel model = new LineChartModel();
 
@@ -47,14 +46,6 @@ public class EmissionController implements Serializable {
 	public void init() {
 		this.setEmissions();
 		this.setEmissionModel();
-	}
-
-	public Emission getSelectedEmission() {
-		return selectedEmission;
-	}
-
-	public void setSelectedEmission(Emission selectedEmission) {
-		this.selectedEmission = selectedEmission;
 	}
 
 	public LineChartModel setEmissionModel() {
@@ -119,26 +110,24 @@ public class EmissionController implements Serializable {
 
 	public void add(Emission emission) {
 		emission.setDraft(false);
-		emissionService.update(emission);
-		this.emissions.remove(emission);
+		boolean updated = emissionService.update(emission);
+		if (updated) {
+			emissionService.removeById(emission.getId());
+			this.emissions.remove(emission);
+		}
+		this.setEmissions();
+	}
+
+	public void update(RowEditEvent<Emission> event) {
+		Emission emission = event.getObject().clone();
+		Emission newEmission = emissionService.add(emission);
+		emissions.add(newEmission);
 		Collections.sort(this.emissions);
 	}
 
-	public void update(CellEditEvent<Emission> event) {
-		Integer i = event.getRowIndex();
-		Emission emission = emissions.get(i);
-		System.out.print("Edit: ");
-		System.out.println(emission);
-		Emission newEmission = emissionService.add(emission);
-		emissions.add(newEmission);
-		Collections.sort(emissions);
-	}
-
-	public void remove() {
-		if (selectedEmission.getId() == null)
-			return;
-		emissionService.removeById(selectedEmission.getId());
-		emissions.remove(selectedEmission);
+	public void remove(Emission emission) {
+		emissionService.removeById(emission.getId());
+		emissions.remove(emission);
 	}
 
 }

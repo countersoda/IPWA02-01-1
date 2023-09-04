@@ -10,7 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @Entity
-public class Emission implements Comparable<Emission> {
+public class Emission implements Comparable<Emission>, Cloneable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -46,7 +46,7 @@ public class Emission implements Comparable<Emission> {
 
 	@Override
 	public String toString() {
-		return String.format("%d - %f - %b", this.year, this.amount, this.draft);
+		return String.format("Year: %d\nAmount: %f\nDraft: %b", this.year, this.amount, this.draft);
 	}
 
 	public float getAmount() {
@@ -84,5 +84,11 @@ public class Emission implements Comparable<Emission> {
 	@Override
 	public int compareTo(Emission o) {
 		return this.year - o.year;
+	}
+	
+	@Override
+	public Emission clone() {
+		Emission emission = new Emission(this.year, this.amount, this.draft, this.country);
+		return emission;
 	}
 }
