@@ -71,12 +71,17 @@
 						</f:facet>
 					</p:cellEditor>
 				</p:column>
-				<p:column
+				<p:column headerText="Approve"
 					rendered="#{val.draft and credentialController.isPublisher()}">
 					<p:commandButton value="Approve" update="@this emissionTableForm"
 						render="@this emissionTableForm"
 						action="#{emissionController.add(val)}">
 					</p:commandButton>
+				</p:column>
+				<p:column headerText="Approval"
+				rendered="#{!credentialController.isPublisher()}">
+					<h:outputText value="Approved" rendered="#{!val.draft}"></h:outputText>
+					<h:outputText value="Disapproved" rendered="#{val.draft}"></h:outputText>
 				</p:column>
 				<p:column rendered="#{credentialController.isPublisher()}">
 					<p:commandButton icon="pi pi-trash"

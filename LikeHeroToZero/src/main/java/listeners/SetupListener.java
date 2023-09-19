@@ -3,10 +3,14 @@ package listeners;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
@@ -32,7 +36,20 @@ public class SetupListener implements ServletContextListener {
 		return null;
 	}
 
+	private boolean hasTables() {
+		return jpaService.runInTransaction(em -> {
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaQuery<Emission> cr = cb.createQuery(Emission.class);
+			Root<Emission> root = cr.from(Emission.class);
+			cr.select(root);
+			List<Emission> result = em.createQuery(cr).getResultList();
+			return result.size() > 0;
+		});
+	}
+
 	public void contextInitialized(ServletContextEvent sce) {
+		if (hasTables())
+			return;
 		jpaService.runInTransaction(em -> {
 			Credential user = new Credential();
 			user.setUsername("test");
@@ -55,8 +72,9 @@ public class SetupListener implements ServletContextListener {
 				String[] values = line.split(";");
 				String name = values[0].trim();
 				String code = values[1].trim();
-				String year = values[4].trim();
-				String amount = values[5].trim();
+				String year = values[3].trim();
+				String amount = values[4].trim();
+
 				if (name.equals("country_name") || amount.isBlank())
 					continue;
 				Country country;

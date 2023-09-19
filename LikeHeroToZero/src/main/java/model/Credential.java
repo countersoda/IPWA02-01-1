@@ -2,6 +2,8 @@ package model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,7 +14,7 @@ public class Credential {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "author_id")
+	@Column(name = "credential_id")
 	private Integer id;
 
 	@Column(name = "username", nullable = false, unique = true)
@@ -22,6 +24,7 @@ public class Credential {
 	private String password;
 
 	@Column(name = "role", nullable = false)
+	@Enumerated(EnumType.STRING)
 	private Role role;
 
 	public Integer getId() {
