@@ -1,10 +1,10 @@
-package service;
+package services;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
-import model.Credential;
+import models.Credential;
 
 @ApplicationScoped
 public class CredentialService {

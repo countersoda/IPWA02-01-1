@@ -1,4 +1,4 @@
-package service;
+package services;
 
 import java.util.List;
 
@@ -8,8 +8,8 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import model.Country;
-import model.Emission;
+import models.Country;
+import models.Emission;
 
 @ApplicationScoped
 public class EmissionService {

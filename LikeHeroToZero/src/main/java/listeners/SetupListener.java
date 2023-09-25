@@ -14,10 +14,10 @@ import jakarta.persistence.criteria.Root;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
-import model.Country;
-import model.Credential;
-import model.Emission;
-import service.JPAService;
+import models.Country;
+import models.Credential;
+import models.Emission;
+import services.JPAService;
 import types.Role;
 
 @WebListener

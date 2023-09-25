@@ -1,4 +1,4 @@
-package model;
+package models;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
-import model.Emission;
+import models.Emission;
 
 @Named("emission")
 @ViewScoped

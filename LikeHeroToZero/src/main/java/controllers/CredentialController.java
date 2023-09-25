@@ -1,4 +1,4 @@
-package controller;
+package controllers;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -10,8 +10,8 @@ import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpSession;
-import model.Credential;
-import service.CredentialService;
+import models.Credential;
+import services.CredentialService;
 import types.Role;
 
 @Named

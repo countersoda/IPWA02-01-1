@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Named;
-import model.Credential;
+import models.Credential;
 
 @Named("credential")
 @SessionScoped

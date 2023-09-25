@@ -6,9 +6,10 @@ import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import models.Country;
 
-@Named("country")
+@Named("dialogCountry")
 @ViewScoped
-public class CountryBean extends Country implements Serializable {
+public class CountryDialogBean extends Country implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
 }

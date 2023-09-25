@@ -1,4 +1,4 @@
-package model;
+package models;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ public class Country implements Comparable<Country> {
 	@Column(name = "country_code", nullable = false)
 	private String code;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "country")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "country", orphanRemoval = true)
 	private List<Emission> emissions = new ArrayList<>();
 
 	public Country() {
