@@ -49,7 +49,7 @@ public class CredentialController implements Serializable {
 		if (user.getUsername() != null && user.getPassword() != null
 				&& user.getUsername().equals(credential.getUsername())
 				&& user.getPassword().equals(credential.getPassword())) {
-			HttpSession session = (HttpSession) context.getSession(false);
+			HttpSession session = (HttpSession) context.getSession(true);
 			session.setMaxInactiveInterval(300);
 			session.setAttribute("username", user.getUsername());
 			credential.setId(user.getId());

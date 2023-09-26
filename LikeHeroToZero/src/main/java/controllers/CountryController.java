@@ -25,7 +25,7 @@ public class CountryController implements Serializable {
 
 	private @Inject CountryBean country;
 	private @Inject CountryService countryService;
-	private @Inject CountryDialogBean selectedCountry;
+	private @Inject CountryDialogBean dialogCountry;
 	private List<Country> countries = new ArrayList<Country>();
 
 	public CountryController() {
@@ -45,11 +45,11 @@ public class CountryController implements Serializable {
 	}
 
 	public void add() {
-		boolean hasCountry = countries.stream().anyMatch(c -> c.getName().equals(this.selectedCountry.getName())
-				|| c.getCode().equals(this.selectedCountry.getCode()));
+		boolean hasCountry = countries.stream().anyMatch(c -> c.getName().equals(this.dialogCountry.getName())
+				|| c.getCode().equals(this.dialogCountry.getCode()));
 		if (hasCountry)
 			return;
-		Country country = countryService.add(this.selectedCountry);
+		Country country = countryService.add(this.dialogCountry);
 		countries.add(country);
 		Collections.sort(countries);
 
