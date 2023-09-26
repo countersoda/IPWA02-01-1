@@ -19,10 +19,10 @@ public class Country implements Comparable<Country> {
 	@Column(name = "country_id")
 	private Integer id;
 
-	@Column(name = "country_name", nullable = false)
+	@Column(name = "country_name", nullable = false, unique = true)
 	private String name;
 
-	@Column(name = "country_code", nullable = false)
+	@Column(name = "country_code", nullable = false, unique = true)
 	private String code;
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "country", orphanRemoval = true)

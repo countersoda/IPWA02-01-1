@@ -18,7 +18,7 @@ public class CountryService {
 			CriteriaBuilder cb = em.getCriteriaBuilder();
 			CriteriaQuery<Country> cq = cb.createQuery(Country.class);
 			Root<Country> root = cq.from(Country.class);
-			cq.select(root).distinct(true);
+			cq.select(root);
 			List<Country> countries = em.createQuery(cq).getResultList();
 			return countries;
 		});
